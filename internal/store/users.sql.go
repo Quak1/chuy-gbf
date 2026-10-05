@@ -15,9 +15,9 @@ VALUES (?, ?, ?)
 `
 
 type CreateUserParams struct {
-	Name    string
-	Comment string
-	Role    string
+	Name    string `json:"name"`
+	Comment string `json:"comment"`
+	Role    string `json:"role"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {

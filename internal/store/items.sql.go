@@ -16,12 +16,12 @@ ON CONFLICT(id) DO NOTHING
 `
 
 type CreateItemParams struct {
-	ID      string
-	Name    string
-	Element string
-	Type    string
-	Series  string
-	Enabled bool
+	ID      string `json:"id"`
+	Name    string `json:"name"`
+	Element string `json:"element"`
+	Type    string `json:"type"`
+	Series  string `json:"series"`
+	Enabled bool   `json:"enabled"`
 }
 
 func (q *Queries) CreateItem(ctx context.Context, arg CreateItemParams) error {

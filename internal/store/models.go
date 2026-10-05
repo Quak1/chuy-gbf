@@ -5,17 +5,17 @@
 package store
 
 type Item struct {
-	ID      string
-	Name    string
-	Element string
-	Type    string
-	Series  string
-	Enabled bool
+	ID      string `json:"id"`
+	Name    string `json:"name"`
+	Element string `json:"element"`
+	Type    string `json:"type"`
+	Series  string `json:"series"`
+	Enabled bool   `json:"enabled"`
 }
 
 type User struct {
-	ID      int64
-	Name    string
-	Comment string
-	Role    string
+	ID      int64  `json:"id"`
+	Name    string `json:"name"`
+	Comment string `json:"comment"`
+	Role    string `json:"role"`
 }
