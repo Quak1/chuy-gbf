@@ -1,7 +1,10 @@
 package updater
 
 import (
-	"fmt"
+	"context"
+
+	"github.com/Quak1/chuy-gbf/internal/database"
+	"github.com/Quak1/chuy-gbf/internal/store"
 )
 
 func LoadData(download bool) error {
@@ -10,9 +13,19 @@ func LoadData(download bool) error {
 		return err
 	}
 
+	db, err := database.InitDB()
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
 	items := parseData(data)
-	for i := range 10 {
-		fmt.Printf("%+v\n", items[i])
+	q := store.New(db)
+
+	for _, item := range items {
+		if item.Rarity == "ssr" {
+			q.CreateItem(context.Background(), store.CreateItemParams(item.Item))
+		}
 	}
 
 	return nil

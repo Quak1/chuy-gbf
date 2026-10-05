@@ -2,20 +2,18 @@ package updater
 
 import (
 	"strings"
+
+	"github.com/Quak1/chuy-gbf/internal/store"
 )
 
-type Item struct {
-	ID      string
-	Element string
-	Type    string
-	Rarity  string
-	Name    string
-	Series  string
+type DataItem struct {
+	store.Item
+	Rarity string
 }
 
-func parseLookup(id, input string) Item {
-	item := Item{
-		ID: id,
+func parseLookup(id, input string) DataItem {
+	item := DataItem{
+		Item: store.Item{ID: id, Enabled: false},
 	}
 
 	if strings.HasPrefix(input, "/") {
@@ -48,8 +46,8 @@ func parseLookup(id, input string) Item {
 	return item
 }
 
-func parseData(data *Data) []Item {
-	items := []Item{}
+func parseData(data *Data) []DataItem {
+	items := []DataItem{}
 
 	for id, l := range data.Lookup {
 		items = append(items, parseLookup(id, l))
