@@ -12,3 +12,10 @@ type Item struct {
 	Series  string
 	Enabled bool
 }
+
+type User struct {
+	ID      int64
+	Name    string
+	Comment string
+	Role    string
+}
