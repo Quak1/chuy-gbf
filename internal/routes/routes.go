@@ -13,11 +13,21 @@ func SetupRouter(db *sql.DB) *chi.Mux {
 	r := chi.NewRouter()
 
 	usersHandler := handlers.NewUsersHandler(q)
+	middleware := handlers.NewMiddlware(q)
 
-	r.Get("/ping", usersHandler.Ping)
 	r.Route("/users", func(r chi.Router) {
 		r.Get("/", usersHandler.ListUsers)
 		r.Post("/", usersHandler.CreateUser)
+
+		r.Route("/{userID:[0-9]+}", func(r chi.Router) {
+			r.Use(middleware.URLIntID("userID"))
+			r.Use(middleware.UserCtx)
+
+			r.Route("/items", func(r chi.Router) {
+				r.Get("/", usersHandler.GetUserItems)
+				r.With(middleware.URLIntID("itemID")).Post("/{itemID:[0-9]+}", usersHandler.SetUserItem)
+			})
+		})
 	})
 
 	return r
