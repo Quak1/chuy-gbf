@@ -3,8 +3,8 @@ SELECT id, username, comment FROM users
 WHERE role != "admin";
 
 -- name: CreateUser :one
-INSERT INTO users (username)
-VALUES (?)
+INSERT INTO users (username, comment, role)
+VALUES (?, "", "")
 ON CONFLICT(username) DO UPDATE SET username = username
 RETURNING id, username, role;
 
@@ -27,7 +27,7 @@ SET role = ""
 WHERE id = ?;
 
 -- name: GetUserItems :many
-SELECT ui.value, i.id, i.name, i.element, i.type, i.series
+SELECT COALESCE(ui.value, '') AS value, i.id, i.name, i.element, i.type, i.series
 FROM items i
 LEFT JOIN user_items ui ON i.id = ui.item_id AND ui.user_id = ?
 WHERE i.enabled = 1;

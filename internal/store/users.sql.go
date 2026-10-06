@@ -7,12 +7,11 @@ package store
 
 import (
 	"context"
-	"database/sql"
 )
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (username)
-VALUES (?)
+INSERT INTO users (username, comment, role)
+VALUES (?, "", "")
 ON CONFLICT(username) DO UPDATE SET username = username
 RETURNING id, username, role
 `
@@ -99,19 +98,19 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 }
 
 const getUserItems = `-- name: GetUserItems :many
-SELECT ui.value, i.id, i.name, i.element, i.type, i.series
+SELECT COALESCE(ui.value, '') AS value, i.id, i.name, i.element, i.type, i.series
 FROM items i
 LEFT JOIN user_items ui ON i.id = ui.item_id AND ui.user_id = ?
 WHERE i.enabled = 1
 `
 
 type GetUserItemsRow struct {
-	Value   sql.NullString `json:"value"`
-	ID      string         `json:"id"`
-	Name    string         `json:"name"`
-	Element string         `json:"element"`
-	Type    string         `json:"type"`
-	Series  string         `json:"series"`
+	Value   string `json:"value"`
+	ID      string `json:"id"`
+	Name    string `json:"name"`
+	Element string `json:"element"`
+	Type    string `json:"type"`
+	Series  string `json:"series"`
 }
 
 func (q *Queries) GetUserItems(ctx context.Context, userID int64) ([]GetUserItemsRow, error) {
