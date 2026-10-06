@@ -49,3 +49,15 @@ func ErrorInvalidRequest(err error) render.Renderer {
 		ErrorText:  err.Error(),
 	}
 }
+
+func ErrorParse(key string) render.Renderer {
+	return &ErrResponse{
+		StatusCode: http.StatusInternalServerError,
+		ErrorMsg:   "Failed to parse key: " + key,
+	}
+}
+
+var ErrorForbidden = &ErrResponse{
+	StatusCode: http.StatusForbidden,
+	ErrorMsg:   "You don't have access to this resource",
+}

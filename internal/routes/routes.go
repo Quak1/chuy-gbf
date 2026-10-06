@@ -12,8 +12,9 @@ func SetupRouter(db *sql.DB) *chi.Mux {
 	q := store.New(db)
 	r := chi.NewRouter()
 
-	usersHandler := handlers.NewUsersHandler(q)
 	middleware := handlers.NewMiddlware(q)
+	usersHandler := handlers.NewUsersHandler(q)
+	itemsHandler := handlers.NewItemsHandler(q)
 
 	r.Route("/users", func(r chi.Router) {
 		r.Get("/", usersHandler.ListUsers)
@@ -23,10 +24,22 @@ func SetupRouter(db *sql.DB) *chi.Mux {
 			r.Use(middleware.URLIntID("userID"))
 			r.Use(middleware.UserCtx)
 
+			r.Get("/", usersHandler.GetUser)
+			r.Post("/", usersHandler.SetUserComment)
+
 			r.Route("/items", func(r chi.Router) {
 				r.Get("/", usersHandler.GetUserItems)
-				r.With(middleware.URLIntID("itemID")).Post("/{itemID:[0-9]+}", usersHandler.SetUserItem)
+				r.Post("/{itemID:[0-9]+}", usersHandler.SetUserItem)
 			})
+		})
+	})
+
+	r.Route("/items", func(r chi.Router) {
+		r.Get("/", itemsHandler.GetItems)
+
+		r.Route("/{itemID:[0-9]+}", func(r chi.Router) {
+			r.Post("/enable", itemsHandler.EnableItem)
+			r.Post("/disable", itemsHandler.DisableItem)
 		})
 	})
 

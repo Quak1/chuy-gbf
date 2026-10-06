@@ -35,6 +35,6 @@ type User struct {
 
 type UserItem struct {
 	UserID int64  `json:"user_id"`
-	ItemID int64  `json:"item_id"`
+	ItemID string `json:"item_id"`
 	Value  string `json:"value"`
 }

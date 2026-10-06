@@ -9,9 +9,11 @@ import (
 	"context"
 )
 
-const createUser = `-- name: CreateUser :exec
+const createUser = `-- name: CreateUser :one
 INSERT INTO users (username, comment, role)
 VALUES (?, ?, ?)
+ON CONFLICT(username) DO UPDATE SET username = username
+RETURNING id, username
 `
 
 type CreateUserParams struct {
@@ -20,30 +22,38 @@ type CreateUserParams struct {
 	Role     string `json:"role"`
 }
 
-func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
-	_, err := q.db.ExecContext(ctx, createUser, arg.Username, arg.Comment, arg.Role)
-	return err
+type CreateUserRow struct {
+	ID       int64  `json:"id"`
+	Username string `json:"username"`
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error) {
+	row := q.db.QueryRowContext(ctx, createUser, arg.Username, arg.Comment, arg.Role)
+	var i CreateUserRow
+	err := row.Scan(&i.ID, &i.Username)
+	return i, err
 }
 
 const getAllUsers = `-- name: GetAllUsers :many
-SELECT id, username, comment, role FROM users
+SELECT id, username, comment FROM users
 `
 
-func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
+type GetAllUsersRow struct {
+	ID       int64  `json:"id"`
+	Username string `json:"username"`
+	Comment  string `json:"comment"`
+}
+
+func (q *Queries) GetAllUsers(ctx context.Context) ([]GetAllUsersRow, error) {
 	rows, err := q.db.QueryContext(ctx, getAllUsers)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []User
+	var items []GetAllUsersRow
 	for rows.Next() {
-		var i User
-		if err := rows.Scan(
-			&i.ID,
-			&i.Username,
-			&i.Comment,
-			&i.Role,
-		); err != nil {
+		var i GetAllUsersRow
+		if err := rows.Scan(&i.ID, &i.Username, &i.Comment); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -83,7 +93,7 @@ WHERE u.id = ? AND i.enabled = 1
 `
 
 type GetUserItemsRow struct {
-	ItemID  int64  `json:"item_id"`
+	ItemID  string `json:"item_id"`
 	Value   string `json:"value"`
 	Name    string `json:"name"`
 	Element string `json:"element"`
@@ -143,6 +153,22 @@ func (q *Queries) RemoveUserRole(ctx context.Context, id int64) error {
 	return err
 }
 
+const setUserComment = `-- name: SetUserComment :exec
+UPDATE users
+SET comment = ?
+WHERE id = ?
+`
+
+type SetUserCommentParams struct {
+	Comment string `json:"comment"`
+	ID      int64  `json:"id"`
+}
+
+func (q *Queries) SetUserComment(ctx context.Context, arg SetUserCommentParams) error {
+	_, err := q.db.ExecContext(ctx, setUserComment, arg.Comment, arg.ID)
+	return err
+}
+
 const setUserItem = `-- name: SetUserItem :exec
 INSERT INTO user_items (user_id, item_id, value)
 VALUES (?, ?, ?)
@@ -151,7 +177,7 @@ ON CONFLICT (user_id, item_id) DO UPDATE SET value=excluded.value
 
 type SetUserItemParams struct {
 	UserID int64  `json:"user_id"`
-	ItemID int64  `json:"item_id"`
+	ItemID string `json:"item_id"`
 	Value  string `json:"value"`
 }
 

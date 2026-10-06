@@ -36,6 +36,28 @@ func (q *Queries) CreateItem(ctx context.Context, arg CreateItemParams) error {
 	return err
 }
 
+const disableItem = `-- name: DisableItem :exec
+UPDATE items
+SET enabled = 0
+WHERE id = ?
+`
+
+func (q *Queries) DisableItem(ctx context.Context, id string) error {
+	_, err := q.db.ExecContext(ctx, disableItem, id)
+	return err
+}
+
+const enableItem = `-- name: EnableItem :exec
+UPDATE items
+SET enabled = 1
+WHERE id = ?
+`
+
+func (q *Queries) EnableItem(ctx context.Context, id string) error {
+	_, err := q.db.ExecContext(ctx, enableItem, id)
+	return err
+}
+
 const getAllItems = `-- name: GetAllItems :many
 SELECT id, name, element, type, series, enabled FROM items
 `

@@ -1,9 +1,11 @@
 -- name: GetAllUsers :many
-SELECT * FROM users;
+SELECT id, username, comment FROM users;
 
--- name: CreateUser :exec
+-- name: CreateUser :one
 INSERT INTO users (username, comment, role)
-VALUES (?, ?, ?);
+VALUES (?, ?, ?)
+ON CONFLICT(username) DO UPDATE SET username = username
+RETURNING id, username;
 
 -- name: GetUser :one
 SELECT * FROM users
@@ -30,3 +32,8 @@ WHERE u.id = ? AND i.enabled = 1;
 INSERT INTO user_items (user_id, item_id, value)
 VALUES (?, ?, ?)
 ON CONFLICT (user_id, item_id) DO UPDATE SET value=excluded.value;
+
+-- name: SetUserComment :exec
+UPDATE users
+SET comment = ?
+WHERE id = ?;
