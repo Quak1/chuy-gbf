@@ -10,23 +10,23 @@ import (
 )
 
 const createUser = `-- name: CreateUser :exec
-INSERT INTO users (name, comment, role)
+INSERT INTO users (username, comment, role)
 VALUES (?, ?, ?)
 `
 
 type CreateUserParams struct {
-	Name    string `json:"name"`
-	Comment string `json:"comment"`
-	Role    string `json:"role"`
+	Username string `json:"username"`
+	Comment  string `json:"comment"`
+	Role     string `json:"role"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
-	_, err := q.db.ExecContext(ctx, createUser, arg.Name, arg.Comment, arg.Role)
+	_, err := q.db.ExecContext(ctx, createUser, arg.Username, arg.Comment, arg.Role)
 	return err
 }
 
 const getAllUsers = `-- name: GetAllUsers :many
-SELECT id, name, comment, role FROM users
+SELECT id, username, comment, role FROM users
 `
 
 func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
@@ -40,9 +40,73 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
 		var i User
 		if err := rows.Scan(
 			&i.ID,
-			&i.Name,
+			&i.Username,
 			&i.Comment,
 			&i.Role,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getUser = `-- name: GetUser :one
+SELECT id, username, comment, role FROM users
+WHERE id = ?
+`
+
+func (q *Queries) GetUser(ctx context.Context, id int64) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUser, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Comment,
+		&i.Role,
+	)
+	return i, err
+}
+
+const getUserItems = `-- name: GetUserItems :many
+SELECT ui.item_id, ui.value, i.name, i.element, i.type, i.series
+FROM users u
+JOIN user_items ui ON u.id = ui.user_id
+JOIN items i ON i.id = ui.item_id
+WHERE u.id = ? AND i.enabled = 1
+`
+
+type GetUserItemsRow struct {
+	ItemID  int64  `json:"item_id"`
+	Value   string `json:"value"`
+	Name    string `json:"name"`
+	Element string `json:"element"`
+	Type    string `json:"type"`
+	Series  string `json:"series"`
+}
+
+func (q *Queries) GetUserItems(ctx context.Context, id int64) ([]GetUserItemsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getUserItems, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetUserItemsRow
+	for rows.Next() {
+		var i GetUserItemsRow
+		if err := rows.Scan(
+			&i.ItemID,
+			&i.Value,
+			&i.Name,
+			&i.Element,
+			&i.Type,
+			&i.Series,
 		); err != nil {
 			return nil, err
 		}
@@ -76,5 +140,22 @@ WHERE id = ?
 
 func (q *Queries) RemoveUserRole(ctx context.Context, id int64) error {
 	_, err := q.db.ExecContext(ctx, removeUserRole, id)
+	return err
+}
+
+const setUserItem = `-- name: SetUserItem :exec
+INSERT INTO user_items (user_id, item_id, value)
+VALUES (?, ?, ?)
+ON CONFLICT (user_id, item_id) DO UPDATE SET value=excluded.value
+`
+
+type SetUserItemParams struct {
+	UserID int64  `json:"user_id"`
+	ItemID int64  `json:"item_id"`
+	Value  string `json:"value"`
+}
+
+func (q *Queries) SetUserItem(ctx context.Context, arg SetUserItemParams) error {
+	_, err := q.db.ExecContext(ctx, setUserItem, arg.UserID, arg.ItemID, arg.Value)
 	return err
 }

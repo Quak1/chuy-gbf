@@ -4,6 +4,10 @@
 
 package store
 
+import (
+	"database/sql"
+)
+
 type Item struct {
 	ID      string `json:"id"`
 	Name    string `json:"name"`
@@ -13,9 +17,24 @@ type Item struct {
 	Enabled bool   `json:"enabled"`
 }
 
+type ItemAuditLog struct {
+	ID        int64        `json:"id"`
+	UserID    int64        `json:"user_id"`
+	ItemID    int64        `json:"item_id"`
+	OldValue  interface{}  `json:"old_value"`
+	NewValue  interface{}  `json:"new_value"`
+	CreatedAt sql.NullTime `json:"created_at"`
+}
+
 type User struct {
-	ID      int64  `json:"id"`
-	Name    string `json:"name"`
-	Comment string `json:"comment"`
-	Role    string `json:"role"`
+	ID       int64  `json:"id"`
+	Username string `json:"username"`
+	Comment  string `json:"comment"`
+	Role     string `json:"role"`
+}
+
+type UserItem struct {
+	UserID int64  `json:"user_id"`
+	ItemID int64  `json:"item_id"`
+	Value  string `json:"value"`
 }
