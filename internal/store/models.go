@@ -21,8 +21,8 @@ type ItemAuditLog struct {
 	ID        int64        `json:"id"`
 	UserID    int64        `json:"user_id"`
 	ItemID    int64        `json:"item_id"`
-	OldValue  interface{}  `json:"old_value"`
-	NewValue  interface{}  `json:"new_value"`
+	OldValue  string       `json:"old_value"`
+	NewValue  string       `json:"new_value"`
 	CreatedAt sql.NullTime `json:"created_at"`
 }
 

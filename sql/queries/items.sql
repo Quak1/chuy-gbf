@@ -19,3 +19,6 @@ WHERE id = ?;
 -- name: GetEnabledItems :many
 SELECT * FROM items
 WHERE enabled = 1;
+
+-- name: GetUserItemValues :many
+SELECT * FROM user_items;

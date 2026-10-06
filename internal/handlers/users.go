@@ -166,3 +166,51 @@ func (h *UserHandler) SetUserComment(w http.ResponseWriter, r *http.Request) {
 
 	render.JSON(w, r, "OK")
 }
+
+type UserItemValues struct {
+	ID       int64             `json:"id"`
+	Username string            `json:"username"`
+	Values   map[string]string `json:"values"`
+}
+
+func (h *UserHandler) GetAllUsersItems(w http.ResponseWriter, r *http.Request) {
+	users := map[int64]UserItemValues{}
+
+	dbUsers, err := h.query.GetAllUsers(r.Context())
+	if err != nil {
+		render.Render(w, r, ErrorServer(err))
+		return
+	}
+
+	for _, u := range dbUsers {
+		users[u.ID] = UserItemValues{
+			ID:       u.ID,
+			Username: u.Username,
+			Values:   map[string]string{},
+		}
+	}
+
+	values, err := h.query.GetUserItemValues(r.Context())
+	if err != nil {
+		render.Render(w, r, ErrorServer(err))
+		return
+	}
+
+	for _, v := range values {
+		users[v.UserID].Values[v.ItemID] = v.Value
+	}
+
+	items, err := h.query.GetEnabledItems(r.Context())
+	if err != nil {
+		render.Render(w, r, ErrorServer(err))
+		return
+	}
+
+	render.JSON(w, r, struct {
+		Users map[int64]UserItemValues `json:"users"`
+		Items []store.Item             `json:"items"`
+	}{
+		Users: users,
+		Items: items,
+	})
+}

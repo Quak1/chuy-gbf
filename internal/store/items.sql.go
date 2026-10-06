@@ -126,3 +126,30 @@ func (q *Queries) GetEnabledItems(ctx context.Context) ([]Item, error) {
 	}
 	return items, nil
 }
+
+const getUserItemValues = `-- name: GetUserItemValues :many
+SELECT user_id, item_id, value FROM user_items
+`
+
+func (q *Queries) GetUserItemValues(ctx context.Context) ([]UserItem, error) {
+	rows, err := q.db.QueryContext(ctx, getUserItemValues)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []UserItem
+	for rows.Next() {
+		var i UserItem
+		if err := rows.Scan(&i.UserID, &i.ItemID, &i.Value); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

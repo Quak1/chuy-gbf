@@ -19,6 +19,7 @@ func SetupRouter(db *sql.DB) *chi.Mux {
 	r.Route("/users", func(r chi.Router) {
 		r.Get("/", usersHandler.ListUsers)
 		r.Post("/", usersHandler.CreateUser)
+		r.Get("/items", usersHandler.GetAllUsersItems)
 
 		r.Route("/{userID:[0-9]+}", func(r chi.Router) {
 			r.Use(middleware.URLIntID("userID"))

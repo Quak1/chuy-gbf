@@ -7,6 +7,7 @@ package store
 
 import (
 	"context"
+	"database/sql"
 )
 
 const createUser = `-- name: CreateUser :one
@@ -102,24 +103,23 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 }
 
 const getUserItems = `-- name: GetUserItems :many
-SELECT ui.item_id, ui.value, i.name, i.element, i.type, i.series
-FROM users u
-JOIN user_items ui ON u.id = ui.user_id
-JOIN items i ON i.id = ui.item_id
-WHERE u.id = ? AND i.enabled = 1
+SELECT ui.value, i.id, i.name, i.element, i.type, i.series
+FROM items i
+LEFT JOIN user_items ui ON i.id = ui.item_id AND ui.user_id = ?
+WHERE i.enabled = 1
 `
 
 type GetUserItemsRow struct {
-	ItemID  string `json:"item_id"`
-	Value   string `json:"value"`
-	Name    string `json:"name"`
-	Element string `json:"element"`
-	Type    string `json:"type"`
-	Series  string `json:"series"`
+	Value   sql.NullString `json:"value"`
+	ID      string         `json:"id"`
+	Name    string         `json:"name"`
+	Element string         `json:"element"`
+	Type    string         `json:"type"`
+	Series  string         `json:"series"`
 }
 
-func (q *Queries) GetUserItems(ctx context.Context, id int64) ([]GetUserItemsRow, error) {
-	rows, err := q.db.QueryContext(ctx, getUserItems, id)
+func (q *Queries) GetUserItems(ctx context.Context, userID int64) ([]GetUserItemsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getUserItems, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -128,8 +128,8 @@ func (q *Queries) GetUserItems(ctx context.Context, id int64) ([]GetUserItemsRow
 	for rows.Next() {
 		var i GetUserItemsRow
 		if err := rows.Scan(
-			&i.ItemID,
 			&i.Value,
+			&i.ID,
 			&i.Name,
 			&i.Element,
 			&i.Type,

@@ -26,11 +26,10 @@ SET role = ""
 WHERE id = ?;
 
 -- name: GetUserItems :many
-SELECT ui.item_id, ui.value, i.name, i.element, i.type, i.series
-FROM users u
-JOIN user_items ui ON u.id = ui.user_id
-JOIN items i ON i.id = ui.item_id
-WHERE u.id = ? AND i.enabled = 1;
+SELECT ui.value, i.id, i.name, i.element, i.type, i.series
+FROM items i
+LEFT JOIN user_items ui ON i.id = ui.item_id AND ui.user_id = ?
+WHERE i.enabled = 1;
 
 -- name: SetUserItem :exec
 INSERT INTO user_items (user_id, item_id, value)
