@@ -1,9 +1,10 @@
 -- name: GetAllUsers :many
-SELECT id, username, comment FROM users;
+SELECT id, username, comment FROM users
+WHERE role != "admin";
 
 -- name: CreateUser :one
-INSERT INTO users (username, comment, role)
-VALUES (?, ?, ?)
+INSERT INTO users (username)
+VALUES (?)
 ON CONFLICT(username) DO UPDATE SET username = username
 RETURNING id, username, role;
 

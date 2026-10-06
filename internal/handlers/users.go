@@ -49,7 +49,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbUser, err := h.query.CreateUser(r.Context(), store.CreateUserParams{Username: user.Username})
+	dbUser, err := h.query.CreateUser(r.Context(), user.Username)
 	if err != nil {
 		render.Render(w, r, ErrorServer(err))
 		return
@@ -197,6 +197,9 @@ func (h *UserHandler) GetAllUsersItems(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, v := range values {
+		if _, ok := users[v.UserID]; !ok {
+			continue
+		}
 		users[v.UserID].Values[v.ItemID] = v.Value
 	}
 
