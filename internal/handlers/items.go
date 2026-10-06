@@ -51,3 +51,13 @@ func (h *ItemsHandler) GetItems(w http.ResponseWriter, r *http.Request) {
 
 	render.JSON(w, r, items)
 }
+
+func (h *ItemsHandler) GetEnabledItems(w http.ResponseWriter, r *http.Request) {
+	items, err := h.query.GetEnabledItems(r.Context())
+	if err != nil {
+		render.Render(w, r, ErrorServer(err))
+		return
+	}
+
+	render.JSON(w, r, items)
+}

@@ -36,6 +36,7 @@ func SetupRouter(db *sql.DB) *chi.Mux {
 
 	r.Route("/items", func(r chi.Router) {
 		r.Get("/", itemsHandler.GetItems)
+		r.Get("/enabled", itemsHandler.GetEnabledItems)
 
 		r.Route("/{itemID:[0-9]+}", func(r chi.Router) {
 			r.Use(middleware.IsAdminRole)

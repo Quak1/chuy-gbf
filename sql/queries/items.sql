@@ -15,3 +15,7 @@ WHERE id = ?;
 UPDATE items
 SET enabled = 0
 WHERE id = ?;
+
+-- name: GetEnabledItems :many
+SELECT * FROM items
+WHERE enabled = 1;
