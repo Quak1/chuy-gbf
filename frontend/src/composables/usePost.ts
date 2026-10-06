@@ -1,11 +1,11 @@
 import { ref, toValue } from "vue";
 
-export function usePost<T>(url: string) {
+export function usePost<T>() {
   const data = ref<T | null>(null);
   const error = ref<Error | null>(null);
   const loading = ref(false);
 
-  const post = async (payload: any) => {
+  const post = async (url: string, payload: any) => {
     data.value = null;
     error.value = null;
     loading.value = true;
@@ -30,6 +30,7 @@ export function usePost<T>(url: string) {
     }
 
     loading.value = false;
+    return true;
   };
 
   return { post, data, error, loading };

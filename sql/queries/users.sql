@@ -5,7 +5,7 @@ SELECT id, username, comment FROM users;
 INSERT INTO users (username, comment, role)
 VALUES (?, ?, ?)
 ON CONFLICT(username) DO UPDATE SET username = username
-RETURNING id, username;
+RETURNING id, username, role;
 
 -- name: GetUser :one
 SELECT * FROM users

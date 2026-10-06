@@ -5,8 +5,9 @@ import { router } from "../router";
 const userKey = "user";
 const user = ref<User | null>(null);
 
-const login = (username: string, id: number) => {
-  user.value = { username, id };
+const login = (u: User) => {
+  user.value = u;
+  console.log(u);
   localStorage.setItem(userKey, JSON.stringify(user.value));
 };
 
@@ -22,8 +23,7 @@ export function useUser(redirect: boolean = true) {
     try {
       const val = JSON.parse(stored);
       const id = parseInt(val.id);
-      const username = String(val.username);
-      user.value = { username, id };
+      user.value = { id, username: val.username, role: val.role };
     } catch (e) {
       console.error("Error parsing localStorage");
     }

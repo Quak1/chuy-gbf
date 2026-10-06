@@ -7,15 +7,15 @@ import { router } from "../router";
 
 const username = ref("");
 const { login } = useUser(false);
-const { post, data, error, loading } = usePost<User>("/api/users");
+const { post, data, error, loading } = usePost<User>();
 
 const handleSubmit = async () => {
-  post({ username: username.value });
+  post("/api/users", { username: username.value });
 };
 
 watch(data, () => {
   if (data.value) {
-    login(data.value.username, data.value.id);
+    login(data.value);
     router.push({ name: "Home" });
   }
 });
