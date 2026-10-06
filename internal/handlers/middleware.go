@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -59,5 +60,41 @@ func (m *Middleware) UserCtx(next http.Handler) http.Handler {
 
 		ctx := context.WithValue(r.Context(), UserContextKey, user)
 		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+type AdminRequest struct {
+	Username string `json:"username"`
+}
+
+func (u *AdminRequest) Bind(r *http.Request) error {
+	if u.Username == "" {
+		return errors.New("username field is required")
+	}
+	return nil
+}
+
+func (m *Middleware) IsAdminRole(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var username AdminRequest
+		err := render.Bind(r, &username)
+		if err != nil {
+			render.Render(w, r, ErrorInvalidRequest(err))
+			return
+		}
+
+		user, err := m.query.GetUserByUsername(r.Context(), username.Username)
+		if err != nil {
+			log.Println(err)
+			render.Render(w, r, ErrorForbidden)
+			return
+		}
+
+		if user.Role != "admin" {
+			render.Render(w, r, ErrorForbidden)
+			return
+		}
+
+		next.ServeHTTP(w, r)
 	})
 }

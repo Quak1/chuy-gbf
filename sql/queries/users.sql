@@ -11,6 +11,10 @@ RETURNING id, username;
 SELECT * FROM users
 WHERE id = ?;
 
+-- name: GetUserByUsername :one
+SELECT * FROM users
+WHERE username = ?;
+
 -- name: MakeUserAdmin :exec
 UPDATE users
 SET role = "admin"
