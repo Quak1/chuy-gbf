@@ -16,33 +16,35 @@ func SetupRouter(db *sql.DB) *chi.Mux {
 	usersHandler := handlers.NewUsersHandler(q)
 	itemsHandler := handlers.NewItemsHandler(q)
 
-	r.Route("/users", func(r chi.Router) {
-		r.Get("/", usersHandler.ListUsers)
-		r.Post("/", usersHandler.CreateUser)
-		r.Get("/items", usersHandler.GetAllUsersItems)
+	r.Route("/api", func(r chi.Router) {
+		r.Route("/users", func(r chi.Router) {
+			r.Get("/", usersHandler.ListUsers)
+			r.Post("/", usersHandler.CreateUser)
+			r.Get("/items", usersHandler.GetAllUsersItems)
 
-		r.Route("/{userID:[0-9]+}", func(r chi.Router) {
-			r.Use(middleware.URLIntID("userID"))
-			r.Use(middleware.UserCtx)
+			r.Route("/{userID:[0-9]+}", func(r chi.Router) {
+				r.Use(middleware.URLIntID("userID"))
+				r.Use(middleware.UserCtx)
 
-			r.Get("/", usersHandler.GetUser)
-			r.Post("/", usersHandler.SetUserComment)
+				r.Get("/", usersHandler.GetUser)
+				r.Post("/", usersHandler.SetUserComment)
 
-			r.Route("/items", func(r chi.Router) {
-				r.Get("/", usersHandler.GetUserItems)
-				r.Post("/{itemID:[0-9]+}", usersHandler.SetUserItem)
+				r.Route("/items", func(r chi.Router) {
+					r.Get("/", usersHandler.GetUserItems)
+					r.Post("/{itemID:[0-9]+}", usersHandler.SetUserItem)
+				})
 			})
 		})
-	})
 
-	r.Route("/items", func(r chi.Router) {
-		r.Get("/", itemsHandler.GetItems)
-		r.Get("/enabled", itemsHandler.GetEnabledItems)
+		r.Route("/items", func(r chi.Router) {
+			r.Get("/", itemsHandler.GetItems)
+			r.Get("/enabled", itemsHandler.GetEnabledItems)
 
-		r.Route("/{itemID:[0-9]+}", func(r chi.Router) {
-			r.Use(middleware.IsAdminRole)
-			r.Post("/enable", itemsHandler.EnableItem)
-			r.Post("/disable", itemsHandler.DisableItem)
+			r.Route("/{itemID:[0-9]+}", func(r chi.Router) {
+				r.Use(middleware.IsAdminRole)
+				r.Post("/enable", itemsHandler.EnableItem)
+				r.Post("/disable", itemsHandler.DisableItem)
+			})
 		})
 	})
 

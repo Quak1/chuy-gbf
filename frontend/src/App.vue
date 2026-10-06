@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
+import ItemTable from "./components/ItemTable.vue";
 </script>
 
 <template>
-  <HelloWorld />
+  <ItemTable />
 </template>
