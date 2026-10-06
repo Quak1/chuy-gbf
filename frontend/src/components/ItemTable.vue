@@ -1,25 +1,6 @@
 <script setup lang="ts">
 import { useFetch } from "../composables/useFetch";
-
-interface TableData {
-  items: Item[];
-  users: Record<number, UserItemValues>;
-}
-
-interface UserItemValues {
-  id: number;
-  username: string;
-  values: Record<string, string>;
-}
-
-interface Item {
-  id: string;
-  name: string;
-  element: string;
-  type: string;
-  series: string;
-  enabled: boolean;
-}
+import type { TableData } from "../models";
 
 const { data, error, loading } = useFetch<TableData>("/api/users/items");
 </script>

@@ -1,7 +1,9 @@
-<script setup lang="ts">
-import ItemTable from "./components/ItemTable.vue";
-</script>
+<script setup lang="ts"></script>
 
 <template>
-  <ItemTable />
+  <nav>
+    <RouterLink to="/">Home</RouterLink>
+    <RouterLink to="/hello">Hello</RouterLink>
+  </nav>
+  <RouterView />
 </template>
