@@ -23,3 +23,12 @@ export interface User {
   username: string;
   role: string;
 }
+
+export interface UserItem {
+  id: string;
+  name: string;
+  element: string;
+  type: string;
+  series: string;
+  value: string;
+}

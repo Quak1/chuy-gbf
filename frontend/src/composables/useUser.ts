@@ -7,7 +7,6 @@ const user = ref<User | null>(null);
 
 const login = (u: User) => {
   user.value = u;
-  console.log(u);
   localStorage.setItem(userKey, JSON.stringify(user.value));
 };
 
