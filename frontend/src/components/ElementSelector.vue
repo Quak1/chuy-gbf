@@ -35,7 +35,6 @@ button {
   border-radius: 10px;
   border: none;
   text-transform: capitalize;
-  cursor: pointer;
 }
 button:hover {
   filter: brightness(0.8);

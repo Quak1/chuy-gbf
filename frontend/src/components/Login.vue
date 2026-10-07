@@ -23,13 +23,47 @@ watch(data, () => {
 
 <template>
   <form @submit.prevent="handleSubmit">
-    <label>
-      Username:
-      <input type="text" v-model="username" required />
-      <p v-if="error">Error: {{ error.message }}</p>
-      <p v-else-if="data">Data: {{ data }}</p>
-    </label>
+    <label for="username"> Username: </label>
+    <input type="text" id="username" v-model="username" required />
+    <p v-if="error">Error: {{ error.message }}</p>
+    <p v-else-if="data">Data: {{ data }}</p>
     <button type="submit">Login</button>
     <p v-if="loading">Loading...</p>
   </form>
 </template>
+
+<style scoped>
+form {
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+}
+
+label {
+  display: block;
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--text);
+}
+
+input {
+  max-width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 16px;
+  outline: none;
+  margin: 10px 0;
+}
+
+input:focus {
+  border-color: var(--accent-light);
+}
+
+button {
+  width: 100%;
+  font-size: 16px;
+  padding: 5px 0;
+}
+</style>

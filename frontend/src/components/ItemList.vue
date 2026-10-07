@@ -62,51 +62,60 @@ const toggleEnabled = async (item: Item) => {
 </script>
 
 <template>
-  <div v-if="loading">Loading</div>
-  <div v-if="error">{{ error }}</div>
-  <label
-    >Search
-    <input type="text" v-model="searchFilter" />
-  </label>
-  <table v-if="filtered">
-    <thead>
-      <tr>
-        <td>ID</td>
-        <td>Name</td>
-        <td>
-          <button @click="elementFilter = ''">Element</button>
-          <select v-model="elementFilter">
-            <option v-for="element in elements">{{ element }}</option>
-          </select>
-        </td>
-        <td>
-          <button @click="typeFilter = ''">Type</button>
-          <select v-model="typeFilter">
-            <option v-for="type in types">{{ type }}</option>
-          </select>
-        </td>
-        <td>
-          <button @click="seriesFilter = ''">Series</button>
-          <select v-model="seriesFilter">
-            <option v-for="s in series">{{ s }}</option>
-          </select>
-        </td>
-        <td>Enabled</td>
-      </tr>
-    </thead>
-    <tbody>
-      <tr v-for="item in filtered" :key="item.id">
-        <td>{{ item.id }}</td>
-        <td>{{ item.name }}</td>
-        <td>{{ item.element }}</td>
-        <td>{{ item.type }}</td>
-        <td>{{ item.series }}</td>
-        <td>
-          <button @click="toggleEnabled(item)">
-            {{ item.enabled ? "Disable" : "Enable" }}
-          </button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="container">
+    <div v-if="loading">Loading</div>
+    <div v-if="error">{{ error }}</div>
+    <label
+      >Search
+      <input type="text" v-model="searchFilter" />
+    </label>
+    <table v-if="filtered">
+      <thead>
+        <tr>
+          <td>ID</td>
+          <td>Name</td>
+          <td>
+            <button @click="elementFilter = ''">Element</button>
+            <select v-model="elementFilter">
+              <option v-for="element in elements">{{ element }}</option>
+            </select>
+          </td>
+          <td>
+            <button @click="typeFilter = ''">Type</button>
+            <select v-model="typeFilter">
+              <option v-for="type in types">{{ type }}</option>
+            </select>
+          </td>
+          <td>
+            <button @click="seriesFilter = ''">Series</button>
+            <select v-model="seriesFilter">
+              <option v-for="s in series">{{ s }}</option>
+            </select>
+          </td>
+          <td>Enabled</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="item in filtered" :key="item.id">
+          <td>{{ item.id }}</td>
+          <td>{{ item.name }}</td>
+          <td>{{ item.element }}</td>
+          <td>{{ item.type }}</td>
+          <td>{{ item.series }}</td>
+          <td>
+            <button @click="toggleEnabled(item)">
+              {{ item.enabled ? "Disable" : "Enable" }}
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </template>
+
+<style scoped>
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+</style>

@@ -49,10 +49,12 @@ const filteredItems = computed(() => {
       @update="(e) => (elementFilter = e)"
     />
 
-    <div v-for="item in filteredItems" :key="item.id">
-      <span>{{ item.name }}</span>
-      <span>Value: {{ item.value }}</span>
-      <button @click="openEditModal(item)">Edit</button>
+    <div class="container">
+      <div v-for="item in filteredItems" :key="item.id">
+        <h3>{{ item.name }}</h3>
+        <p>Value: {{ item.value }}</p>
+        <button @click="openEditModal(item)">Edit</button>
+      </div>
     </div>
 
     <EditItemModal
@@ -63,3 +65,24 @@ const filteredItems = computed(() => {
     />
   </div>
 </template>
+
+<style scoped>
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.container > div {
+  width: 200px;
+  padding: 10px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+}
+
+h3 {
+  margin: 5px 0;
+}
+</style>
