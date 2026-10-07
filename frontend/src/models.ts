@@ -24,11 +24,7 @@ export interface User {
   role: string;
 }
 
-export interface UserItem {
-  id: string;
-  name: string;
-  element: string;
-  type: string;
-  series: string;
+export interface UserItem extends Item {
   value: string;
+  enabled: true;
 }
