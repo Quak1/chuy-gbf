@@ -2,14 +2,10 @@
 import { computed, ref } from "vue";
 import { useFetch } from "../composables/useFetch";
 import type { TableData } from "../models";
+import ElementSelector from "./ElementSelector.vue";
 
 const { data, error, loading } = useFetch<TableData>("/api/users/items");
 const elementFilter = ref("dark");
-
-const elements = computed(() => {
-  if (!data.value) return [];
-  return [...new Set(data.value.items.map((item) => item.element))];
-});
 
 const filteredItems = computed(() => {
   return data.value?.items.filter((item) => {
@@ -22,12 +18,13 @@ const filteredItems = computed(() => {
   <div>
     <div v-if="loading">Loading...</div>
     <div v-if="error">{{ error }}</div>
-    <div>
-      <button v-for="element in elements" @click="elementFilter = element">
-        {{ element }}
-      </button>
-    </div>
-    <div v-if="data">
+    <ElementSelector
+      v-if="data"
+      :items="data.items"
+      @update="(e) => (elementFilter = e)"
+    />
+
+    <div v-if="data" class="table-container">
       <table>
         <thead>
           <tr>
@@ -49,3 +46,18 @@ const filteredItems = computed(() => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+tr th:first-child,
+tr td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background-color: var(--border);
+}
+</style>

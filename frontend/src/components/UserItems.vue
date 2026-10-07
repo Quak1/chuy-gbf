@@ -4,6 +4,7 @@ import EditItemModal from "./EditItemModal.vue";
 import type { UserItem } from "../models";
 import { useFetch } from "../composables/useFetch";
 import { useRoute } from "vue-router";
+import ElementSelector from "./ElementSelector.vue";
 
 const isModalOpen = ref(false);
 const selectedItem = ref<UserItem | null>(null);
@@ -33,10 +34,6 @@ function handleItemUpdate(updatedItem: UserItem) {
   closeModal();
 }
 
-const elements = computed(() => {
-  if (!data.value) return [];
-  return [...new Set(data.value.map((item) => item.element))];
-});
 const filteredItems = computed(() => {
   if (!data.value) return [];
   return data.value.filter((item) => item.element == elementFilter.value);
@@ -46,9 +43,11 @@ const filteredItems = computed(() => {
 <template>
   <div v-if="loading">Loading...</div>
   <div v-if="data">
-    <div>
-      <button v-for="e in elements" @click="elementFilter = e">{{ e }}</button>
-    </div>
+    <ElementSelector
+      v-if="data"
+      :items="data"
+      @update="(e) => (elementFilter = e)"
+    />
 
     <div v-for="item in filteredItems" :key="item.id">
       <span>{{ item.name }}</span>
