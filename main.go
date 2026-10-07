@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"embed"
 	"errors"
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
@@ -14,7 +16,15 @@ import (
 	"github.com/Quak1/chuy-gbf/internal/routes"
 )
 
+//go:embed dist/*
+var frontendFS embed.FS
+
 func main() {
+	distFS, err := fs.Sub(frontendFS, "dist")
+	if err != nil {
+		log.Fatal("Failed to load frontend assets:", err)
+	}
+
 	db, err := database.InitDB()
 	if err != nil {
 		log.Printf("Failed to start DB: %v\n", err)
@@ -22,7 +32,7 @@ func main() {
 	}
 	defer db.Close()
 
-	r := routes.SetupRouter(db)
+	r := routes.SetupRouter(db, distFS)
 
 	srv := &http.Server{
 		Addr:         ":8080",

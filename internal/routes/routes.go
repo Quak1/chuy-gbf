@@ -2,13 +2,18 @@ package routes
 
 import (
 	"database/sql"
+	"io"
+	"io/fs"
+	"net/http"
+	"path"
+	"strings"
 
 	"github.com/Quak1/chuy-gbf/internal/handlers"
 	"github.com/Quak1/chuy-gbf/internal/store"
 	"github.com/go-chi/chi/v5"
 )
 
-func SetupRouter(db *sql.DB) *chi.Mux {
+func SetupRouter(db *sql.DB, distFS fs.FS) *chi.Mux {
 	q := store.New(db)
 	r := chi.NewRouter()
 
@@ -46,6 +51,28 @@ func SetupRouter(db *sql.DB) *chi.Mux {
 				r.Post("/disable", itemsHandler.DisableItem)
 			})
 		})
+	})
+
+	r.Get("/*", func(w http.ResponseWriter, req *http.Request) {
+		requestPath := path.Clean(req.URL.Path)
+
+		file, err := distFS.Open(strings.TrimPrefix(requestPath, "/"))
+		if err == nil {
+			file.Close()
+			http.FileServerFS(distFS).ServeHTTP(w, req)
+			return
+		}
+
+		indexFile, err := distFS.Open("index.html")
+		if err != nil {
+			http.Error(w, "Index file not found", http.StatusInternalServerError)
+			return
+		}
+		defer indexFile.Close()
+
+		// Read and serve the index.html content
+		stat, _ := indexFile.Stat()
+		http.ServeContent(w, req, "index.html", stat.ModTime(), indexFile.(io.ReadSeeker))
 	})
 
 	return r
