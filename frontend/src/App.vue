@@ -11,10 +11,16 @@ const itemsURL = computed(() => {
 <template>
   <nav>
     <RouterLink to="/">Home</RouterLink>
-    <RouterLink to="/hello">Hello</RouterLink>
     <RouterLink v-if="user" :to="itemsURL">Items</RouterLink>
     <RouterLink v-if="!user" to="/login">Login</RouterLink>
+    <RouterLink v-if="user" to="/items">Items Admin</RouterLink>
     <button v-if="user" @click="logout">Logout</button>
   </nav>
   <RouterView />
 </template>
+
+<style>
+nav > * {
+  margin: 10px;
+}
+</style>
