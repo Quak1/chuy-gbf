@@ -10,18 +10,18 @@ import (
 )
 
 const createItem = `-- name: CreateItem :exec
-INSERT INTO items (id, name, element, type, series, enabled)
-VALUES (?, ?, ?, ?, ?, ?)
-ON CONFLICT(id) DO NOTHING
+INSERT OR REPLACE INTO items (id, name, element, type, series, enabled, category)
+VALUES (?, ?, ?, ?, ?, ?, ?)
 `
 
 type CreateItemParams struct {
-	ID      string `json:"id"`
-	Name    string `json:"name"`
-	Element string `json:"element"`
-	Type    string `json:"type"`
-	Series  string `json:"series"`
-	Enabled bool   `json:"enabled"`
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	Element  string `json:"element"`
+	Type     string `json:"type"`
+	Series   string `json:"series"`
+	Enabled  bool   `json:"enabled"`
+	Category string `json:"category"`
 }
 
 func (q *Queries) CreateItem(ctx context.Context, arg CreateItemParams) error {
@@ -32,6 +32,7 @@ func (q *Queries) CreateItem(ctx context.Context, arg CreateItemParams) error {
 		arg.Type,
 		arg.Series,
 		arg.Enabled,
+		arg.Category,
 	)
 	return err
 }
@@ -59,7 +60,7 @@ func (q *Queries) EnableItem(ctx context.Context, id string) error {
 }
 
 const getAllItems = `-- name: GetAllItems :many
-SELECT id, name, element, type, series, enabled FROM items
+SELECT id, name, element, type, series, enabled, category FROM items
 `
 
 func (q *Queries) GetAllItems(ctx context.Context) ([]Item, error) {
@@ -78,6 +79,7 @@ func (q *Queries) GetAllItems(ctx context.Context) ([]Item, error) {
 			&i.Type,
 			&i.Series,
 			&i.Enabled,
+			&i.Category,
 		); err != nil {
 			return nil, err
 		}
@@ -93,7 +95,7 @@ func (q *Queries) GetAllItems(ctx context.Context) ([]Item, error) {
 }
 
 const getEnabledItems = `-- name: GetEnabledItems :many
-SELECT id, name, element, type, series, enabled FROM items
+SELECT id, name, element, type, series, enabled, category FROM items
 WHERE enabled = 1
 `
 
@@ -113,6 +115,7 @@ func (q *Queries) GetEnabledItems(ctx context.Context) ([]Item, error) {
 			&i.Type,
 			&i.Series,
 			&i.Enabled,
+			&i.Category,
 		); err != nil {
 			return nil, err
 		}

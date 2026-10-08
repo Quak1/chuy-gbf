@@ -9,12 +9,13 @@ import (
 )
 
 type Item struct {
-	ID      string `json:"id"`
-	Name    string `json:"name"`
-	Element string `json:"element"`
-	Type    string `json:"type"`
-	Series  string `json:"series"`
-	Enabled bool   `json:"enabled"`
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	Element  string `json:"element"`
+	Type     string `json:"type"`
+	Series   string `json:"series"`
+	Enabled  bool   `json:"enabled"`
+	Category string `json:"category"`
 }
 
 type ItemAuditLog struct {

@@ -11,7 +11,9 @@ type DataItem struct {
 	Rarity string
 }
 
-func parseLookup(id, input string) DataItem {
+type CategoryLists map[string]map[string]any
+
+func parseLookup(id, input string, lists *CategoryLists) DataItem {
 	item := DataItem{
 		Item: store.Item{ID: id, Enabled: false},
 	}
@@ -43,14 +45,26 @@ func parseLookup(id, input string) DataItem {
 		}
 	}
 
+	for k, v := range *lists {
+		if _, ok := v[item.ID]; ok {
+			item.Category, _ = strings.CutSuffix(k, "s")
+			break
+		}
+	}
+
 	return item
 }
 
 func parseData(data *Data) []DataItem {
 	items := []DataItem{}
+	lists := &CategoryLists{
+		"weapons":    data.Weapons,
+		"summons":    data.Summons,
+		"characters": data.Characters,
+	}
 
 	for id, l := range data.Lookup {
-		items = append(items, parseLookup(id, l))
+		items = append(items, parseLookup(id, l, lists))
 	}
 
 	return items
