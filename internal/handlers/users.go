@@ -95,7 +95,7 @@ type UserItemRequest struct {
 
 func (u *UserItemRequest) Bind(r *http.Request) error {
 	if u.ValueID == 0 {
-		return errors.New("value field is required")
+		return errors.New("value id field is required")
 	}
 
 	return nil
@@ -127,7 +127,7 @@ func (h *UserHandler) SetUserItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	render.JSON(w, r, "OK")
+	render.NoContent(w, r)
 }
 
 type UserCommentRequest struct {

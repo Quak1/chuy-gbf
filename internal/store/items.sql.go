@@ -37,9 +37,10 @@ func (q *Queries) CreateItem(ctx context.Context, arg CreateItemParams) error {
 	return err
 }
 
-const createItemValue = `-- name: CreateItemValue :exec
+const createItemValue = `-- name: CreateItemValue :one
 INSERT INTO item_values  (item_id, value, color)
 VALUES (?, ?, ?)
+RETURNING id, item_id, value, color
 `
 
 type CreateItemValueParams struct {
@@ -48,9 +49,16 @@ type CreateItemValueParams struct {
 	Color  string `json:"color"`
 }
 
-func (q *Queries) CreateItemValue(ctx context.Context, arg CreateItemValueParams) error {
-	_, err := q.db.ExecContext(ctx, createItemValue, arg.ItemID, arg.Value, arg.Color)
-	return err
+func (q *Queries) CreateItemValue(ctx context.Context, arg CreateItemValueParams) (ItemValue, error) {
+	row := q.db.QueryRowContext(ctx, createItemValue, arg.ItemID, arg.Value, arg.Color)
+	var i ItemValue
+	err := row.Scan(
+		&i.ID,
+		&i.ItemID,
+		&i.Value,
+		&i.Color,
+	)
+	return i, err
 }
 
 const deleteItemValue = `-- name: DeleteItemValue :exec

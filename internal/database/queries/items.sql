@@ -23,9 +23,10 @@ WHERE enabled = 1;
 SELECT ui.user_id, iv.id AS value_id, iv.item_id, iv.value, iv.color FROM user_items ui
 JOIN item_values iv ON ui.item_value_id = iv.id;
 
--- name: CreateItemValue :exec
+-- name: CreateItemValue :one
 INSERT INTO item_values  (item_id, value, color)
-VALUES (?, ?, ?);
+VALUES (?, ?, ?)
+RETURNING *;
 
 -- name: DeleteItemValue :exec
 DELETE FROM item_values WHERE id = ? AND item_id = ?;

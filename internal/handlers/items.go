@@ -100,7 +100,7 @@ func (h *ItemsHandler) CreateItemValue(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := h.query.CreateItemValue(r.Context(), store.CreateItemValueParams{
+	dbValue, err := h.query.CreateItemValue(r.Context(), store.CreateItemValueParams{
 		ItemID: itemID,
 		Value:  data.Value,
 		Color:  data.Color,
@@ -110,7 +110,7 @@ func (h *ItemsHandler) CreateItemValue(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	render.NoContent(w, r)
+	render.JSON(w, r, dbValue)
 }
 
 func (h *ItemsHandler) DeleteItemValue(w http.ResponseWriter, r *http.Request) {
