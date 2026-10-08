@@ -3,8 +3,9 @@ import { ref, watch } from "vue";
 import type { User } from "../models";
 import { useUser } from "../composables/useUser";
 import { usePost } from "../composables/usePost";
-import { router } from "../router";
+import { useRouter } from "vue-router";
 
+const router = useRouter();
 const username = ref("");
 const { login } = useUser(false);
 const { post, data, error, loading } = usePost<User>();

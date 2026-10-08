@@ -3,9 +3,10 @@ import { computed, ref } from "vue";
 import { useFetch } from "../composables/useFetch";
 import type { Item } from "../models";
 import { useUser } from "../composables/useUser";
-import { router } from "../router";
 import { usePost } from "../composables/usePost";
+import { useRouter } from "vue-router";
 
+const router = useRouter();
 const { user } = useUser();
 const { data, loading, error } = useFetch<Item[]>("/api/items");
 const { post, data: postData, error: postError } = usePost();

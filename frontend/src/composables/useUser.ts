@@ -13,6 +13,7 @@ const login = (u: User) => {
 const logout = () => {
   user.value = null;
   localStorage.removeItem(userKey);
+  router.push({ name: "Home" });
 };
 
 export function useUser(redirect: boolean = true) {
