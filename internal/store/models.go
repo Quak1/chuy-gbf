@@ -27,6 +27,13 @@ type ItemAuditLog struct {
 	CreatedAt sql.NullTime `json:"created_at"`
 }
 
+type ItemValue struct {
+	ID     int64  `json:"id"`
+	ItemID string `json:"item_id"`
+	Value  string `json:"value"`
+	Color  string `json:"color"`
+}
+
 type User struct {
 	ID       int64  `json:"id"`
 	Username string `json:"username"`
@@ -35,7 +42,7 @@ type User struct {
 }
 
 type UserItem struct {
-	UserID int64  `json:"user_id"`
-	ItemID string `json:"item_id"`
-	Value  string `json:"value"`
+	UserID      int64  `json:"user_id"`
+	ItemID      string `json:"item_id"`
+	ItemValueID int64  `json:"item_value_id"`
 }

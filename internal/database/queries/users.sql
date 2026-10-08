@@ -27,15 +27,20 @@ SET role = ""
 WHERE id = ?;
 
 -- name: GetUserItems :many
-SELECT COALESCE(ui.value, '') AS value, i.id, i.name, i.element, i.type, i.series, i.category
+SELECT
+  i.*,
+  iv.id    AS item_value_id,
+  iv.value AS value,
+  iv.color AS color
 FROM items i
-LEFT JOIN user_items ui ON i.id = ui.item_id AND ui.user_id = ?
+LEFT JOIN user_items ui ON ui.item_id = i.id AND ui.user_id = ?
+LEFT JOIN item_values iv ON iv.id = ui.item_value_id
 WHERE i.enabled = 1;
 
 -- name: SetUserItem :exec
-INSERT INTO user_items (user_id, item_id, value)
+INSERT INTO user_items (user_id, item_id, item_value_id)
 VALUES (?, ?, ?)
-ON CONFLICT (user_id, item_id) DO UPDATE SET value=excluded.value;
+ON CONFLICT DO UPDATE SET item_value_id = excluded.item_value_id;
 
 -- name: SetUserComment :exec
 UPDATE users

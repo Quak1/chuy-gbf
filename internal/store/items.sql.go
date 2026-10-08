@@ -37,6 +37,36 @@ func (q *Queries) CreateItem(ctx context.Context, arg CreateItemParams) error {
 	return err
 }
 
+const createItemValue = `-- name: CreateItemValue :exec
+INSERT INTO item_values  (item_id, value, color)
+VALUES (?, ?, ?)
+`
+
+type CreateItemValueParams struct {
+	ItemID string `json:"item_id"`
+	Value  string `json:"value"`
+	Color  string `json:"color"`
+}
+
+func (q *Queries) CreateItemValue(ctx context.Context, arg CreateItemValueParams) error {
+	_, err := q.db.ExecContext(ctx, createItemValue, arg.ItemID, arg.Value, arg.Color)
+	return err
+}
+
+const deleteItemValue = `-- name: DeleteItemValue :exec
+DELETE FROM item_values WHERE id = ? AND item_id = ?
+`
+
+type DeleteItemValueParams struct {
+	ID     int64  `json:"id"`
+	ItemID string `json:"item_id"`
+}
+
+func (q *Queries) DeleteItemValue(ctx context.Context, arg DeleteItemValueParams) error {
+	_, err := q.db.ExecContext(ctx, deleteItemValue, arg.ID, arg.ItemID)
+	return err
+}
+
 const disableItem = `-- name: DisableItem :exec
 UPDATE items
 SET enabled = 0
@@ -94,6 +124,48 @@ func (q *Queries) GetAllItems(ctx context.Context) ([]Item, error) {
 	return items, nil
 }
 
+const getAllSelectedItemValues = `-- name: GetAllSelectedItemValues :many
+SELECT ui.user_id, iv.id AS value_id, iv.item_id, iv.value, iv.color FROM user_items ui
+JOIN item_values iv ON ui.item_value_id = iv.id
+`
+
+type GetAllSelectedItemValuesRow struct {
+	UserID  int64  `json:"user_id"`
+	ValueID int64  `json:"value_id"`
+	ItemID  string `json:"item_id"`
+	Value   string `json:"value"`
+	Color   string `json:"color"`
+}
+
+func (q *Queries) GetAllSelectedItemValues(ctx context.Context) ([]GetAllSelectedItemValuesRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAllSelectedItemValues)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllSelectedItemValuesRow
+	for rows.Next() {
+		var i GetAllSelectedItemValuesRow
+		if err := rows.Scan(
+			&i.UserID,
+			&i.ValueID,
+			&i.ItemID,
+			&i.Value,
+			&i.Color,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getEnabledItems = `-- name: GetEnabledItems :many
 SELECT id, name, element, type, series, enabled, category FROM items
 WHERE enabled = 1
@@ -130,20 +202,26 @@ func (q *Queries) GetEnabledItems(ctx context.Context) ([]Item, error) {
 	return items, nil
 }
 
-const getUserItemValues = `-- name: GetUserItemValues :many
-SELECT user_id, item_id, value FROM user_items
+const getItemValues = `-- name: GetItemValues :many
+SELECT id, item_id, value, color FROM item_values
+WHERE item_id = ?
 `
 
-func (q *Queries) GetUserItemValues(ctx context.Context) ([]UserItem, error) {
-	rows, err := q.db.QueryContext(ctx, getUserItemValues)
+func (q *Queries) GetItemValues(ctx context.Context, itemID string) ([]ItemValue, error) {
+	rows, err := q.db.QueryContext(ctx, getItemValues, itemID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []UserItem
+	var items []ItemValue
 	for rows.Next() {
-		var i UserItem
-		if err := rows.Scan(&i.UserID, &i.ItemID, &i.Value); err != nil {
+		var i ItemValue
+		if err := rows.Scan(
+			&i.ID,
+			&i.ItemID,
+			&i.Value,
+			&i.Color,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

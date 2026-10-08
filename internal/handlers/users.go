@@ -55,6 +55,11 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	http.SetCookie(w, &http.Cookie{
+		Name:  "username",
+		Value: dbUser.Username,
+	})
+
 	render.JSON(w, r, dbUser)
 }
 
@@ -85,12 +90,12 @@ func (h *UserHandler) GetUserItems(w http.ResponseWriter, r *http.Request) {
 }
 
 type UserItemRequest struct {
-	Value    string `json:"value"`
+	ValueID  int64  `json:"valueID"`
 	Username string `json:"username"`
 }
 
 func (u *UserItemRequest) Bind(r *http.Request) error {
-	if u.Value == "" {
+	if u.ValueID == 0 {
 		return errors.New("value field is required")
 	}
 	if u.Username == "" {
@@ -116,9 +121,9 @@ func (h *UserHandler) SetUserItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err := h.query.SetUserItem(r.Context(), store.SetUserItemParams{
-		UserID: user.ID,
-		ItemID: itemID,
-		Value:  data.Value,
+		UserID:      user.ID,
+		ItemValueID: data.ValueID,
+		ItemID:      itemID,
 	})
 	if err != nil {
 		render.Render(w, r, ErrorInvalidRequest(err))
@@ -164,13 +169,13 @@ func (h *UserHandler) SetUserComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	render.JSON(w, r, "OK")
+	render.NoContent(w, r)
 }
 
 type UserItemValues struct {
-	ID       int64             `json:"id"`
-	Username string            `json:"username"`
-	Values   map[string]string `json:"values"`
+	ID       int64                      `json:"id"`
+	Username string                     `json:"username"`
+	Values   map[string]store.ItemValue `json:"values"`
 }
 
 func (h *UserHandler) GetAllUsersItems(w http.ResponseWriter, r *http.Request) {
@@ -186,21 +191,25 @@ func (h *UserHandler) GetAllUsersItems(w http.ResponseWriter, r *http.Request) {
 		users[u.ID] = UserItemValues{
 			ID:       u.ID,
 			Username: u.Username,
-			Values:   map[string]string{},
+			Values:   map[string]store.ItemValue{},
 		}
 	}
 
-	values, err := h.query.GetUserItemValues(r.Context())
+	values, err := h.query.GetAllSelectedItemValues(r.Context())
 	if err != nil {
 		render.Render(w, r, ErrorServer(err))
 		return
 	}
 
 	for _, v := range values {
-		if _, ok := users[v.UserID]; !ok {
-			continue
+		if _, ok := users[v.UserID]; ok {
+			users[v.UserID].Values[v.ItemID] = store.ItemValue{
+				ID:     v.ValueID,
+				ItemID: v.ItemID,
+				Value:  v.Value,
+				Color:  v.Color,
+			}
 		}
-		users[v.UserID].Values[v.ItemID] = v.Value
 	}
 
 	items, err := h.query.GetEnabledItems(r.Context())

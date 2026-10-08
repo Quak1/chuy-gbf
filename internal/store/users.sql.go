@@ -7,6 +7,7 @@ package store
 
 import (
 	"context"
+	"database/sql"
 )
 
 const createUser = `-- name: CreateUser :one
@@ -98,20 +99,28 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 }
 
 const getUserItems = `-- name: GetUserItems :many
-SELECT COALESCE(ui.value, '') AS value, i.id, i.name, i.element, i.type, i.series, i.category
+SELECT
+  i.id, i.name, i.element, i.type, i.series, i.enabled, i.category,
+  iv.id    AS item_value_id,
+  iv.value AS value,
+  iv.color AS color
 FROM items i
-LEFT JOIN user_items ui ON i.id = ui.item_id AND ui.user_id = ?
+LEFT JOIN user_items ui ON ui.item_id = i.id AND ui.user_id = ?
+LEFT JOIN item_values iv ON iv.id = ui.item_value_id
 WHERE i.enabled = 1
 `
 
 type GetUserItemsRow struct {
-	Value    string `json:"value"`
-	ID       string `json:"id"`
-	Name     string `json:"name"`
-	Element  string `json:"element"`
-	Type     string `json:"type"`
-	Series   string `json:"series"`
-	Category string `json:"category"`
+	ID          string         `json:"id"`
+	Name        string         `json:"name"`
+	Element     string         `json:"element"`
+	Type        string         `json:"type"`
+	Series      string         `json:"series"`
+	Enabled     bool           `json:"enabled"`
+	Category    string         `json:"category"`
+	ItemValueID sql.NullInt64  `json:"item_value_id"`
+	Value       sql.NullString `json:"value"`
+	Color       sql.NullString `json:"color"`
 }
 
 func (q *Queries) GetUserItems(ctx context.Context, userID int64) ([]GetUserItemsRow, error) {
@@ -124,13 +133,16 @@ func (q *Queries) GetUserItems(ctx context.Context, userID int64) ([]GetUserItem
 	for rows.Next() {
 		var i GetUserItemsRow
 		if err := rows.Scan(
-			&i.Value,
 			&i.ID,
 			&i.Name,
 			&i.Element,
 			&i.Type,
 			&i.Series,
+			&i.Enabled,
 			&i.Category,
+			&i.ItemValueID,
+			&i.Value,
+			&i.Color,
 		); err != nil {
 			return nil, err
 		}
@@ -184,18 +196,18 @@ func (q *Queries) SetUserComment(ctx context.Context, arg SetUserCommentParams) 
 }
 
 const setUserItem = `-- name: SetUserItem :exec
-INSERT INTO user_items (user_id, item_id, value)
+INSERT INTO user_items (user_id, item_id, item_value_id)
 VALUES (?, ?, ?)
-ON CONFLICT (user_id, item_id) DO UPDATE SET value=excluded.value
+ON CONFLICT DO UPDATE SET item_value_id = excluded.item_value_id
 `
 
 type SetUserItemParams struct {
-	UserID int64  `json:"user_id"`
-	ItemID string `json:"item_id"`
-	Value  string `json:"value"`
+	UserID      int64  `json:"user_id"`
+	ItemID      string `json:"item_id"`
+	ItemValueID int64  `json:"item_value_id"`
 }
 
 func (q *Queries) SetUserItem(ctx context.Context, arg SetUserItemParams) error {
-	_, err := q.db.ExecContext(ctx, setUserItem, arg.UserID, arg.ItemID, arg.Value)
+	_, err := q.db.ExecContext(ctx, setUserItem, arg.UserID, arg.ItemID, arg.ItemValueID)
 	return err
 }
