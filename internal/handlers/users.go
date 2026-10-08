@@ -90,16 +90,12 @@ func (h *UserHandler) GetUserItems(w http.ResponseWriter, r *http.Request) {
 }
 
 type UserItemRequest struct {
-	ValueID  int64  `json:"valueID"`
-	Username string `json:"username"`
+	ValueID int64 `json:"valueID"`
 }
 
 func (u *UserItemRequest) Bind(r *http.Request) error {
 	if u.ValueID == 0 {
 		return errors.New("value field is required")
-	}
-	if u.Username == "" {
-		return errors.New("username field is required")
 	}
 
 	return nil
@@ -107,6 +103,7 @@ func (u *UserItemRequest) Bind(r *http.Request) error {
 
 func (h *UserHandler) SetUserItem(w http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value(UserContextKey).(store.User)
+	username := r.Context().Value(UsernameKey).(string)
 	itemID := chi.URLParam(r, "itemID")
 
 	var data UserItemRequest
@@ -115,7 +112,7 @@ func (h *UserHandler) SetUserItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if user.Username != data.Username {
+	if user.Username != username {
 		render.Render(w, r, ErrorForbidden)
 		return
 	}
@@ -134,28 +131,20 @@ func (h *UserHandler) SetUserItem(w http.ResponseWriter, r *http.Request) {
 }
 
 type UserCommentRequest struct {
-	Comment  string `json:"comment"`
-	Username string `json:"username"`
-}
-
-func (u *UserCommentRequest) Bind(r *http.Request) error {
-	if u.Username == "" {
-		return errors.New("username field is required")
-	}
-
-	return nil
+	Comment string `json:"comment"`
 }
 
 func (h *UserHandler) SetUserComment(w http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value(UserContextKey).(store.User)
+	username := r.Context().Value(UsernameKey).(string)
 
 	var data UserCommentRequest
-	if err := render.Bind(r, &data); err != nil {
+	if err := render.DecodeJSON(r.Body, &data); err != nil {
 		render.Render(w, r, ErrorInvalidRequest(err))
 		return
 	}
 
-	if user.Username != data.Username {
+	if user.Username != username {
 		render.Render(w, r, ErrorForbidden)
 		return
 	}

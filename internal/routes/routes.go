@@ -36,11 +36,11 @@ func SetupRouter(db *sql.DB, distFS fs.FS) *chi.Mux {
 				r.Use(middleware.UserCtx)
 
 				r.Get("/", usersHandler.GetUser)
-				r.Post("/comment", usersHandler.SetUserComment)
+				r.With(middleware.RequireUsername).Post("/comment", usersHandler.SetUserComment)
 
 				r.Route("/items", func(r chi.Router) {
 					r.Get("/", usersHandler.GetUserItems)
-					r.Post("/{itemID:[0-9]+}", usersHandler.SetUserItem)
+					r.With(middleware.RequireUsername).Post("/{itemID:[0-9]+}", usersHandler.SetUserItem)
 				})
 			})
 		})
@@ -50,6 +50,7 @@ func SetupRouter(db *sql.DB, distFS fs.FS) *chi.Mux {
 			r.Get("/enabled", itemsHandler.GetEnabledItems)
 
 			r.Route("/{itemID:[0-9]+}", func(r chi.Router) {
+				r.Use(middleware.RequireUsername)
 				r.Use(middleware.IsAdminRole)
 				r.Post("/enable", itemsHandler.EnableItem)
 				r.Post("/disable", itemsHandler.DisableItem)

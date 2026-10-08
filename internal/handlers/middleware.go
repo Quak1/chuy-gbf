@@ -27,6 +27,7 @@ type contextKey string
 
 const (
 	UserContextKey contextKey = "user"
+	UsernameKey    contextKey = "username"
 )
 
 func (m *Middleware) URLIntID(key string) func(http.Handler) http.Handler {
@@ -63,27 +64,11 @@ func (m *Middleware) UserCtx(next http.Handler) http.Handler {
 	})
 }
 
-type AdminRequest struct {
-	Username string `json:"username"`
-}
-
-func (u *AdminRequest) Bind(r *http.Request) error {
-	if u.Username == "" {
-		return errors.New("username field is required")
-	}
-	return nil
-}
-
 func (m *Middleware) IsAdminRole(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var username AdminRequest
-		err := render.Bind(r, &username)
-		if err != nil {
-			render.Render(w, r, ErrorInvalidRequest(err))
-			return
-		}
+		username := r.Context().Value(UsernameKey).(string)
 
-		user, err := m.query.GetUserByUsername(r.Context(), username.Username)
+		user, err := m.query.GetUserByUsername(r.Context(), username)
 		if err != nil {
 			log.Println(err)
 			render.Render(w, r, ErrorForbidden)
@@ -96,5 +81,20 @@ func (m *Middleware) IsAdminRole(next http.Handler) http.Handler {
 		}
 
 		next.ServeHTTP(w, r)
+	})
+}
+
+func (m *Middleware) RequireUsername(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		cookie, err := r.Cookie("username")
+		if err != nil {
+			if errors.Is(err, http.ErrNoCookie) {
+				render.Render(w, r, ErrorInvalidRequest(err))
+			}
+			render.Render(w, r, ErrorServer(err))
+		}
+
+		ctx := context.WithValue(r.Context(), contextKey(UsernameKey), cookie.Value)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
