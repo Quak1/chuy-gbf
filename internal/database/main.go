@@ -1,14 +1,17 @@
 package database
 
 import (
+	"cmp"
 	"database/sql"
 	"fmt"
+	"os"
 
 	_ "modernc.org/sqlite"
 )
 
 func InitDB() (*sql.DB, error) {
-	dsn := "file:data.db?" +
+	dbPath := cmp.Or(os.Getenv("DB_PATH"), "data.db")
+	dsn := fmt.Sprintf("file:%s?", dbPath) +
 		"_pragma=foreign_keys(1)&" +
 		"_pragma=journal_mode(WAL)&" +
 		"_pragma=busy_timeout(5000)"

@@ -1,0 +1,12 @@
+services:
+  webapp:
+    image: quak1/chuy-gbf:v1
+    container_name: chuy-gbf
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - db_data:/data
+
+volumes:
+  db_data:

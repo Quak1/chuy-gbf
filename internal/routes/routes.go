@@ -22,6 +22,10 @@ func SetupRouter(db *sql.DB, distFS fs.FS) *chi.Mux {
 	itemsHandler := handlers.NewItemsHandler(q)
 
 	r.Route("/api", func(r chi.Router) {
+		r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("Pong"))
+		})
+
 		r.Route("/users", func(r chi.Router) {
 			r.Get("/", usersHandler.ListUsers)
 			r.Post("/", usersHandler.CreateUser)
