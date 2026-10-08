@@ -5,6 +5,7 @@ import type { UserItem } from "../models";
 import { useFetch } from "../composables/useFetch";
 import { useRoute } from "vue-router";
 import ElementSelector from "./ElementSelector.vue";
+import ItemImage from "./ItemImage.vue";
 
 const isModalOpen = ref(false);
 const selectedItem = ref<UserItem | null>(null);
@@ -51,6 +52,7 @@ const filteredItems = computed(() => {
 
     <div class="container">
       <div v-for="item in filteredItems" :key="item.id">
+        <ItemImage :item="item" />
         <h3>{{ item.name }}</h3>
         <p>Value: {{ item.value }}</p>
         <button @click="openEditModal(item)">Edit</button>
@@ -80,9 +82,21 @@ const filteredItems = computed(() => {
   padding: 10px;
   border: 2px solid var(--border);
   border-radius: 10px;
-}
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 
-h3 {
-  margin: 5px 0;
+  img {
+    align-self: center;
+  }
+
+  h3 {
+    margin: 0;
+    text-transform: capitalize;
+  }
+
+  button {
+    margin-top: auto;
+  }
 }
 </style>

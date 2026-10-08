@@ -16,6 +16,7 @@ export interface Item {
   type: string;
   series: string;
   enabled: boolean;
+  category: string;
 }
 
 export interface User {

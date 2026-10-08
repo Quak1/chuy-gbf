@@ -39,7 +39,9 @@ const filtered = computed(() => {
 
   return data.value.filter((item) => {
     const matchSearch =
-      !searchFilter.value || item.name.includes(searchFilter.value);
+      !searchFilter.value ||
+      item.name.includes(searchFilter.value) ||
+      item.id.includes(searchFilter.value);
     const matchElement =
       !elementFilter.value || item.element === elementFilter.value;
     const matchType = !typeFilter.value || item.type === typeFilter.value;
@@ -118,5 +120,13 @@ const toggleEnabled = async (item: Item) => {
 .container {
   max-width: 1200px;
   margin: 0 auto;
+}
+td {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+thead button {
+  display: block;
 }
 </style>

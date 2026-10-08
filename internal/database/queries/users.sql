@@ -27,7 +27,7 @@ SET role = ""
 WHERE id = ?;
 
 -- name: GetUserItems :many
-SELECT COALESCE(ui.value, '') AS value, i.id, i.name, i.element, i.type, i.series
+SELECT COALESCE(ui.value, '') AS value, i.id, i.name, i.element, i.type, i.series, i.category
 FROM items i
 LEFT JOIN user_items ui ON i.id = ui.item_id AND ui.user_id = ?
 WHERE i.enabled = 1;

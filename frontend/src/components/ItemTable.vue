@@ -3,6 +3,7 @@ import { computed, ref } from "vue";
 import { useFetch } from "../composables/useFetch";
 import type { TableData } from "../models";
 import ElementSelector from "./ElementSelector.vue";
+import ItemImage from "./ItemImage.vue";
 
 const { data, error, loading } = useFetch<TableData>("/api/users/items");
 const elementFilter = ref("dark");
@@ -28,9 +29,9 @@ const filteredItems = computed(() => {
       <table>
         <thead>
           <tr>
-            <th>Username</th>
+            <th></th>
             <th v-for="item in filteredItems" :key="item.id">
-              {{ item.name.toUpperCase() }}
+              <ItemImage :item="item" />
             </th>
           </tr>
         </thead>
@@ -51,6 +52,10 @@ const filteredItems = computed(() => {
 .table-container {
   width: 100%;
   overflow-x: auto;
+}
+
+th {
+  padding: 0;
 }
 
 tr th:first-child,

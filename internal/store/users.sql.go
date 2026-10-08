@@ -98,19 +98,20 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 }
 
 const getUserItems = `-- name: GetUserItems :many
-SELECT COALESCE(ui.value, '') AS value, i.id, i.name, i.element, i.type, i.series
+SELECT COALESCE(ui.value, '') AS value, i.id, i.name, i.element, i.type, i.series, i.category
 FROM items i
 LEFT JOIN user_items ui ON i.id = ui.item_id AND ui.user_id = ?
 WHERE i.enabled = 1
 `
 
 type GetUserItemsRow struct {
-	Value   string `json:"value"`
-	ID      string `json:"id"`
-	Name    string `json:"name"`
-	Element string `json:"element"`
-	Type    string `json:"type"`
-	Series  string `json:"series"`
+	Value    string `json:"value"`
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	Element  string `json:"element"`
+	Type     string `json:"type"`
+	Series   string `json:"series"`
+	Category string `json:"category"`
 }
 
 func (q *Queries) GetUserItems(ctx context.Context, userID int64) ([]GetUserItemsRow, error) {
@@ -129,6 +130,7 @@ func (q *Queries) GetUserItems(ctx context.Context, userID int64) ([]GetUserItem
 			&i.Element,
 			&i.Type,
 			&i.Series,
+			&i.Category,
 		); err != nil {
 			return nil, err
 		}
