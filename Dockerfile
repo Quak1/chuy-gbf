@@ -9,7 +9,7 @@ FROM golang:1.26-alpine AS backend-builder
 WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
-COPY sql/ ./sql/
+COPY cmd/ ./cmd/
 COPY internal/ ./internal/
 COPY main.go ./
 COPY --from=frontend-builder /app/dist ./dist
@@ -22,7 +22,7 @@ RUN mkdir /data
 ENV DB_PATH=/data/data.db
 EXPOSE 8080
 
-HEALTHCHECK --interval=30s --timeout=1s --start-period=5s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=1s --start-period=30s --retries=3 \
   CMD curl --fail http://localhost:8080/api/ping || exit 1
 
 CMD ["./server"]
