@@ -6,25 +6,15 @@ import { useFetch } from "../composables/useFetch";
 import { useRoute } from "vue-router";
 import ElementSelector from "./ElementSelector.vue";
 import ItemImage from "./ItemImage.vue";
+import { useModal } from "../composables/useModal";
 
-const isModalOpen = ref(false);
-const selectedItem = ref<UserItem | null>(null);
 const elementFilter = ref("dark");
+const { selectedData, openModal, closeModal } = useModal<UserItem>();
 
 const route = useRoute();
 const { data, loading } = useFetch<UserItem[]>(
   `/api/users/${route.params.userID}/items`,
 );
-
-function openEditModal(item: UserItem) {
-  selectedItem.value = item;
-  isModalOpen.value = true;
-}
-
-function closeModal() {
-  isModalOpen.value = false;
-  selectedItem.value = null;
-}
 
 function handleItemUpdate(updatedItem: UserItem) {
   if (!data.value) return;
@@ -55,13 +45,13 @@ const filteredItems = computed(() => {
         <ItemImage :item="item" />
         <h3>{{ item.name }}</h3>
         <p>Value: {{ item.value }}</p>
-        <button @click="openEditModal(item)">Edit</button>
+        <button @click="openModal(item)">Edit</button>
       </div>
     </div>
 
     <EditItemModal
-      v-if="isModalOpen && selectedItem"
-      :item="selectedItem"
+      v-if="selectedData"
+      :item="selectedData"
       @close="closeModal"
       @updated="handleItemUpdate"
     />

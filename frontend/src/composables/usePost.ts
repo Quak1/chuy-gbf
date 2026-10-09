@@ -26,11 +26,12 @@ export function usePost<T>() {
         error.value = err;
       } else {
         console.error("An unexpected error occurred: ", err);
+        error.value = new Error("Unexpected error occurred");
       }
     }
 
     loading.value = false;
-    return true;
+    return error.value ? false : true;
   };
 
   return { post, data, error, loading };

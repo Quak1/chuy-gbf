@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { ref } from "vue";
 import type { UserItem } from "../models";
 import { usePost } from "../composables/usePost";
 import { useUser } from "../composables/useUser";
+import Modal from "./Modal.vue";
 
 const props = defineProps<{
   item: UserItem;
@@ -10,19 +11,9 @@ const props = defineProps<{
 
 const emit = defineEmits(["close", "updated"]);
 
-const dialogRef = ref<HTMLDialogElement | null>(null);
 const draftValue = ref(props.item.value);
 const { user } = useUser(false);
 const { post, error, loading } = usePost();
-
-onMounted(() => {
-  dialogRef.value?.showModal();
-});
-
-function onCancel(e: Event) {
-  e.preventDefault();
-  emit("close");
-}
 
 async function submitValue() {
   if (draftValue.value === props.item.value) {
@@ -33,7 +24,6 @@ async function submitValue() {
   const url = `/api/users/${user.value?.id}/items/${props.item.id}`;
   const ok = await post(url, {
     value: draftValue.value,
-    username: user.value?.username,
   });
 
   if (ok) {
@@ -46,7 +36,7 @@ async function submitValue() {
 </script>
 
 <template>
-  <dialog ref="dialogRef" @cancel="onCancel">
+  <Modal @close="$emit('close')">
     <div>
       <h3>Edit {{ item.name }}</h3>
 
@@ -69,7 +59,7 @@ async function submitValue() {
 
       <p v-if="error">{{ error }}</p>
     </div>
-  </dialog>
+  </Modal>
 </template>
 
 <style scoped>
