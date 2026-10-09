@@ -56,11 +56,25 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		Name:  "username",
-		Value: dbUser.Username,
+		Name:     "username",
+		Value:    dbUser.Username,
+		Path:     "/api",
+		HttpOnly: true,
 	})
 
 	render.JSON(w, r, dbUser)
+}
+
+func (h *UserHandler) Logout(w http.ResponseWriter, r *http.Request) {
+	http.SetCookie(w, &http.Cookie{
+		MaxAge:   -1,
+		Name:     "username",
+		Value:    "",
+		Path:     "/api",
+		HttpOnly: true,
+	})
+
+	render.NoContent(w, r)
 }
 
 func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {

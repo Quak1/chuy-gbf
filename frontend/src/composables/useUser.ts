@@ -11,6 +11,7 @@ const login = (u: User) => {
 };
 
 const logout = () => {
+  fetch("/api/users/logout", { method: "POST" });
   user.value = null;
   localStorage.removeItem(userKey);
   router.push({ name: "Home" });
