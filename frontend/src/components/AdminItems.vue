@@ -5,6 +5,8 @@ import type { Item } from "../models";
 import { useUser } from "../composables/useUser";
 import { usePost } from "../composables/usePost";
 import { useRouter } from "vue-router";
+import { useModal } from "../composables/useModal";
+import AdminItemSetupModal from "./AdminItemSetupModal.vue";
 
 const router = useRouter();
 const { user } = useUser();
@@ -14,6 +16,7 @@ const elementFilter = ref("");
 const typeFilter = ref("");
 const seriesFilter = ref("");
 const searchFilter = ref("");
+const { selectedData, openModal, closeModal } = useModal<Item>();
 
 if (user.value?.role !== "admin") {
   router.push({ name: "Home" });
@@ -53,7 +56,7 @@ const filtered = computed(() => {
 
 const toggleEnabled = async (item: Item) => {
   const url = `/api/items/${item.id}/${item.enabled ? "disable" : "enable"}`;
-  const ok = await post(url, { username: user.value?.username });
+  const ok = await post(url, {});
   if (ok) {
     item.enabled = !item.enabled;
   } else {
@@ -65,6 +68,12 @@ const toggleEnabled = async (item: Item) => {
 </script>
 
 <template>
+  <AdminItemSetupModal
+    v-if="selectedData"
+    :item="selectedData"
+    @close="closeModal"
+  />
+
   <div class="container">
     <div v-if="loading">Loading</div>
     <div v-if="error">{{ error }}</div>
@@ -95,7 +104,7 @@ const toggleEnabled = async (item: Item) => {
               <option v-for="s in series">{{ s }}</option>
             </select>
           </td>
-          <td>Enabled</td>
+          <td>Setup</td>
         </tr>
       </thead>
       <tbody>
@@ -109,6 +118,7 @@ const toggleEnabled = async (item: Item) => {
             <button @click="toggleEnabled(item)">
               {{ item.enabled ? "Disable" : "Enable" }}
             </button>
+            <button @click="openModal(item)">Edit values</button>
           </td>
         </tr>
       </tbody>

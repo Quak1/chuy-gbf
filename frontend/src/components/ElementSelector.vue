@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed, onMounted } from "vue";
 import type { Item } from "../models";
 
 const props = defineProps<{
@@ -9,7 +10,12 @@ const emit = defineEmits<{
   update: [element: string];
 }>();
 
-const elements = [...new Set(props.items?.map((item) => item.element))];
+const elements = computed(() => [
+  ...new Set(props.items?.map((item) => item.element)),
+]);
+onMounted(() => {
+  emit("update", elements.value[0]);
+});
 </script>
 
 <template>

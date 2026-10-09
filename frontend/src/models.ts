@@ -29,3 +29,10 @@ export interface UserItem extends Item {
   value: string;
   enabled: true;
 }
+
+export interface ItemValue {
+  id: number;
+  item_id: string;
+  value: string;
+  color: string;
+}
