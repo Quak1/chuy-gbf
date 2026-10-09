@@ -7,10 +7,15 @@ import ItemImage from "./ItemImage.vue";
 
 const { data, error, loading } = useFetch<TableData>("/api/users/items");
 const elementFilter = ref("dark");
+const searchString = ref("");
 
 const filteredItems = computed(() => {
-  return data.value?.items.filter((item) => {
-    return item.element === elementFilter.value;
+  if (!data.value) return [];
+
+  return data.value.items.filter((item) => {
+    const matchElement = elementFilter.value === item.element;
+    const matchItemName = item.name.includes(searchString.value);
+    return matchElement && matchItemName;
   });
 });
 </script>
@@ -24,6 +29,16 @@ const filteredItems = computed(() => {
       :items="data.items"
       @update="(e) => (elementFilter = e)"
     />
+
+    <div class="search-container">
+      <label for="search">Item search: </label>
+      <input
+        type="text"
+        id="search"
+        v-model="searchString"
+        autocomplete="off"
+      />
+    </div>
 
     <div v-if="data" class="table-container">
       <table>
@@ -51,6 +66,18 @@ const filteredItems = computed(() => {
 </template>
 
 <style scoped>
+.search-container {
+  margin: 10px 0;
+
+  input {
+    padding: 5px;
+    background-color: var(--accent-light);
+    color: var(--bg);
+    border: 2px solid var(--bg);
+    border-radius: 30px;
+  }
+}
+
 .table-container {
   overflow-x: auto;
 }

@@ -88,23 +88,6 @@ h3 {
   text-transform: capitalize;
 }
 
-label {
-  margin: 10px 0;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 18px;
-}
-
-input {
-  width: 100%;
-  font-size: 18px;
-  background-color: var(--accent-light);
-  color: var(--bg);
-  border: 2px solid var(--bg);
-  border-radius: 10px;
-}
-
 .buttons {
   display: flex;
   justify-content: end;
