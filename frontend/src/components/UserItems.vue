@@ -45,7 +45,7 @@ const filteredItems = computed(() => {
         <ItemImage :item="item" />
         <h3>{{ item.name }}</h3>
         <p :style="{ backgroundColor: item.color }">
-          {{ item.value || "unset" }}
+          {{ item.value || "no value" }}
         </p>
         <button @click="openModal(item)">Edit</button>
       </div>
@@ -76,7 +76,7 @@ const filteredItems = computed(() => {
   border-radius: 10px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 
   img {
     align-self: center;
@@ -88,14 +88,12 @@ const filteredItems = computed(() => {
   }
 
   p {
-    color: rgba(0, 0, 0, 0.6);
+    color: var(--black-clear);
+    background-color: rgba(255, 255, 255, 0.2);
     font-size: 20px;
     text-align: center;
     border-radius: 20px;
     padding: 5px 0;
-  }
-
-  button {
     margin-top: auto;
   }
 }

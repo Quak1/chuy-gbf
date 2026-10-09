@@ -130,8 +130,8 @@ button:hover {
 
   button {
     font-size: 20px;
-    color: rgba(0, 0, 0, 0.6);
-    border: 2px solid rgba(0, 0, 0, 0.5);
+    color: var(--black-clear);
+    border: 2px solid var(--black-clear);
   }
 }
 </style>

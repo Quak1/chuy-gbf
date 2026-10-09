@@ -38,11 +38,8 @@ const filteredItems = computed(() => {
         <tbody>
           <tr v-for="user in data.users" :key="user.id">
             <td>{{ user.username }}</td>
-            <td v-for="item in filteredItems" :key="item.id" class="cell">
-              <div
-                class="cell-text"
-                :style="{ backgroundColor: user.values[item.id]?.color }"
-              >
+            <td v-for="item in filteredItems" :key="item.id">
+              <div :style="{ backgroundColor: user.values[item.id]?.color }">
                 {{ user.values[item.id]?.value }}
               </div>
             </td>
@@ -55,8 +52,13 @@ const filteredItems = computed(() => {
 
 <style scoped>
 .table-container {
-  width: 100%;
   overflow-x: auto;
+}
+
+table {
+  table-layout: fixed;
+  border-collapse: collapse;
+  user-select: none;
 }
 
 th {
@@ -69,19 +71,41 @@ tr td:first-child {
   left: 0;
   z-index: 1;
   background-color: var(--border);
+  border: 1px solid var(--black-clear);
 }
 
-.cell {
-  padding: 0;
+tr th:first-child {
+  width: 120px;
+  min-width: 120px;
+}
+tr th:not(:first-child) {
+  width: 100px;
+  min-width: 100px;
 }
 
-.cell-text {
-  text-align: center;
+tr td:first-child {
   padding: 5px;
-  font-size: 20px;
+}
+
+tr td:not(:first-child) {
+  padding: 0px;
   height: 100%;
-  border-radius: 50px;
-  color: rgba(0, 0, 0, 0.5);
-  font-weight: bold;
+  height: 28px;
+
+  div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 100%;
+    padding: 5px;
+    margin: 1px;
+    box-sizing: border-box;
+    border-radius: 50px;
+
+    font-weight: bold;
+    line-height: 0em;
+    color: var(--black-clear);
+  }
 }
 </style>

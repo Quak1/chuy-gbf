@@ -19,7 +19,7 @@ const src = computed(() => getItemImageURL(props.item, props.highRes));
 img {
   width: 100%;
   height: auto;
-  min-width: 150px;
+  min-width: 50px;
   display: block;
 }
 
