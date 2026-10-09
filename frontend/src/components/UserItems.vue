@@ -44,7 +44,9 @@ const filteredItems = computed(() => {
       <div v-for="item in filteredItems" :key="item.id">
         <ItemImage :item="item" />
         <h3>{{ item.name }}</h3>
-        <p>Value: {{ item.value }}</p>
+        <p :style="{ backgroundColor: item.color }">
+          {{ item.value || "unset" }}
+        </p>
         <button @click="openModal(item)">Edit</button>
       </div>
     </div>
@@ -53,7 +55,7 @@ const filteredItems = computed(() => {
       v-if="selectedData"
       :item="selectedData"
       @close="closeModal"
-      @updated="handleItemUpdate"
+      @update="handleItemUpdate"
     />
   </div>
 </template>
@@ -83,6 +85,14 @@ const filteredItems = computed(() => {
   h3 {
     margin: 0;
     text-transform: capitalize;
+  }
+
+  p {
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 20px;
+    text-align: center;
+    border-radius: 20px;
+    padding: 5px 0;
   }
 
   button {

@@ -29,9 +29,9 @@ WHERE id = ?;
 -- name: GetUserItems :many
 SELECT
   i.*,
-  iv.id    AS item_value_id,
-  iv.value AS value,
-  iv.color AS color
+  COALESCE(iv.id, 0) AS item_value_id,
+  COALESCE(iv.value, '') AS value,
+  COALESCE(iv.color, '') AS color
 FROM items i
 LEFT JOIN user_items ui ON ui.item_id = i.id AND ui.user_id = ?
 LEFT JOIN item_values iv ON iv.id = ui.item_value_id

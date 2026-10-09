@@ -38,8 +38,13 @@ const filteredItems = computed(() => {
         <tbody>
           <tr v-for="user in data.users" :key="user.id">
             <td>{{ user.username }}</td>
-            <td v-for="item in filteredItems" :key="item.id">
-              {{ user.values[item.id] }}
+            <td v-for="item in filteredItems" :key="item.id" class="cell">
+              <div
+                class="cell-text"
+                :style="{ backgroundColor: user.values[item.id]?.color }"
+              >
+                {{ user.values[item.id]?.value }}
+              </div>
             </td>
           </tr>
         </tbody>
@@ -64,5 +69,19 @@ tr td:first-child {
   left: 0;
   z-index: 1;
   background-color: var(--border);
+}
+
+.cell {
+  padding: 0;
+}
+
+.cell-text {
+  text-align: center;
+  padding: 5px;
+  font-size: 20px;
+  height: 100%;
+  border-radius: 50px;
+  color: rgba(0, 0, 0, 0.5);
+  font-weight: bold;
 }
 </style>

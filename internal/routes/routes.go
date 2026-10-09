@@ -49,6 +49,7 @@ func SetupRouter(db *sql.DB, distFS fs.FS) *chi.Mux {
 			r.Get("/", itemsHandler.GetItems)
 			r.Get("/enabled", itemsHandler.GetEnabledItems)
 
+			r.Get("/{itemID:[0-9]+}/values", itemsHandler.GetItemValues)
 			r.Route("/{itemID:[0-9]+}", func(r chi.Router) {
 				r.Use(middleware.RequireUsername)
 				r.Use(middleware.IsAdminRole)
@@ -56,7 +57,6 @@ func SetupRouter(db *sql.DB, distFS fs.FS) *chi.Mux {
 				r.Post("/disable", itemsHandler.DisableItem)
 
 				r.Route("/values", func(r chi.Router) {
-					r.Get("/", itemsHandler.GetItemValues)
 					r.Post("/", itemsHandler.CreateItemValue)
 					r.With(middleware.URLIntID("valueID")).Delete("/{valueID:[0-9]+}", itemsHandler.DeleteItemValue)
 				})

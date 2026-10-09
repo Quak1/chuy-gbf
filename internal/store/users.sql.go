@@ -7,7 +7,6 @@ package store
 
 import (
 	"context"
-	"database/sql"
 )
 
 const createUser = `-- name: CreateUser :one
@@ -101,9 +100,9 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 const getUserItems = `-- name: GetUserItems :many
 SELECT
   i.id, i.name, i.element, i.type, i.series, i.enabled, i.category,
-  iv.id    AS item_value_id,
-  iv.value AS value,
-  iv.color AS color
+  COALESCE(iv.id, 0) AS item_value_id,
+  COALESCE(iv.value, '') AS value,
+  COALESCE(iv.color, '') AS color
 FROM items i
 LEFT JOIN user_items ui ON ui.item_id = i.id AND ui.user_id = ?
 LEFT JOIN item_values iv ON iv.id = ui.item_value_id
@@ -111,16 +110,16 @@ WHERE i.enabled = 1
 `
 
 type GetUserItemsRow struct {
-	ID          string         `json:"id"`
-	Name        string         `json:"name"`
-	Element     string         `json:"element"`
-	Type        string         `json:"type"`
-	Series      string         `json:"series"`
-	Enabled     bool           `json:"enabled"`
-	Category    string         `json:"category"`
-	ItemValueID sql.NullInt64  `json:"item_value_id"`
-	Value       sql.NullString `json:"value"`
-	Color       sql.NullString `json:"color"`
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Element     string `json:"element"`
+	Type        string `json:"type"`
+	Series      string `json:"series"`
+	Enabled     bool   `json:"enabled"`
+	Category    string `json:"category"`
+	ItemValueID int64  `json:"item_value_id"`
+	Value       string `json:"value"`
+	Color       string `json:"color"`
 }
 
 func (q *Queries) GetUserItems(ctx context.Context, userID int64) ([]GetUserItemsRow, error) {
