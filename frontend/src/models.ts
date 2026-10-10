@@ -6,6 +6,7 @@ export interface TableData {
 export interface UserItemValues {
   id: number;
   username: string;
+  comment: string;
   values: Record<string, ItemValue>;
 }
 
@@ -23,6 +24,7 @@ export interface User {
   id: number;
   username: string;
   role: string;
+  comment: string;
 }
 
 export interface UserItem extends Item {

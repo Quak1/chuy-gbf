@@ -178,6 +178,7 @@ func (h *UserHandler) SetUserComment(w http.ResponseWriter, r *http.Request) {
 type UserItemValues struct {
 	ID       int64                      `json:"id"`
 	Username string                     `json:"username"`
+	Comment  string                     `json:"comment"`
 	Values   map[string]store.ItemValue `json:"values"`
 }
 
@@ -194,6 +195,7 @@ func (h *UserHandler) GetAllUsersItems(w http.ResponseWriter, r *http.Request) {
 		users[u.ID] = UserItemValues{
 			ID:       u.ID,
 			Username: u.Username,
+			Comment:  u.Comment,
 			Values:   map[string]store.ItemValue{},
 		}
 	}

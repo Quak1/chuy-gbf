@@ -4,6 +4,8 @@ import { useFetch } from "../composables/useFetch";
 import type { TableData } from "../models";
 import ElementSelector from "./ElementSelector.vue";
 import ItemImage from "./ItemImage.vue";
+import CommentIcon from "./icons/CommentIcon.vue";
+import HoverTooltip from "./HoverTooltip.vue";
 
 const { data, error, loading } = useFetch<TableData>("/api/users/items");
 const elementFilter = ref("dark");
@@ -52,7 +54,19 @@ const filteredItems = computed(() => {
         </thead>
         <tbody>
           <tr v-for="user in data.users" :key="user.id">
-            <td>{{ user.username }}</td>
+            <td>
+              <div>
+                <RouterLink :to="`/users/${user.id}/items`"
+                  >{{ user.username }}
+                </RouterLink>
+                <HoverTooltip v-if="user.comment" class="tooltip">
+                  <template #outer>
+                    <CommentIcon />
+                  </template>
+                  {{ user.comment }}
+                </HoverTooltip>
+              </div>
+            </td>
             <td v-for="item in filteredItems" :key="item.id">
               <div :style="{ backgroundColor: user.values[item.id]?.color }">
                 {{ user.values[item.id]?.value }}
@@ -102,8 +116,7 @@ tr td:first-child {
 }
 
 tr th:first-child {
-  width: 120px;
-  min-width: 120px;
+  min-width: 100px;
 }
 tr th:not(:first-child) {
   width: 100px;
@@ -111,7 +124,20 @@ tr th:not(:first-child) {
 }
 
 tr td:first-child {
+  > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
   padding: 5px;
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+  a:hover {
+    filter: brightness(1.3);
+  }
 }
 
 tr td:not(:first-child) {
@@ -134,5 +160,11 @@ tr td:not(:first-child) {
     line-height: 0em;
     color: var(--black-clear);
   }
+}
+
+.tooltip {
+  margin-left: 10px;
+  height: 20px;
+  width: 20px;
 }
 </style>

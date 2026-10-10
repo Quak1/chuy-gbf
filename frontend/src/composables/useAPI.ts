@@ -13,11 +13,10 @@ export function useAPI<T>() {
     try {
       const res = await fetch(toValue(url), options);
 
-      if (res.status !== 204) data.value = await res.json();
-
       if (!res.ok) {
-        throw new Error(data.value.error);
+        throw new Error(data.value?.error || res.statusText);
       }
+      if (res.status !== 204) data.value = await res.json();
     } catch (err) {
       if (err instanceof Error) {
         error.value = err;
