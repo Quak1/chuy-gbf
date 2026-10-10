@@ -49,7 +49,15 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbUser, err := h.query.CreateUser(r.Context(), user.Username)
+	role := ""
+	if user.Username == "admin" {
+		role = "admin"
+	}
+
+	dbUser, err := h.query.CreateUser(r.Context(), store.CreateUserParams{
+		Username: user.Username,
+		Role:     role,
+	})
 	if err != nil {
 		render.Render(w, r, ErrorServer(err))
 		return

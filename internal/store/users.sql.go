@@ -11,10 +11,15 @@ import (
 
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (username, comment, role)
-VALUES (?, "", "")
+VALUES (?, "", ?)
 ON CONFLICT(username) DO UPDATE SET username = username
 RETURNING id, username, role
 `
+
+type CreateUserParams struct {
+	Username string `json:"username"`
+	Role     string `json:"role"`
+}
 
 type CreateUserRow struct {
 	ID       int64  `json:"id"`
@@ -22,8 +27,8 @@ type CreateUserRow struct {
 	Role     string `json:"role"`
 }
 
-func (q *Queries) CreateUser(ctx context.Context, username string) (CreateUserRow, error) {
-	row := q.db.QueryRowContext(ctx, createUser, username)
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error) {
+	row := q.db.QueryRowContext(ctx, createUser, arg.Username, arg.Role)
 	var i CreateUserRow
 	err := row.Scan(&i.ID, &i.Username, &i.Role)
 	return i, err

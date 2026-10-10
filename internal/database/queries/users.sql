@@ -4,7 +4,7 @@ WHERE role != "admin";
 
 -- name: CreateUser :one
 INSERT INTO users (username, comment, role)
-VALUES (?, "", "")
+VALUES (?, "", ?)
 ON CONFLICT(username) DO UPDATE SET username = username
 RETURNING id, username, role;
 
