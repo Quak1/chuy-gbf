@@ -2,27 +2,26 @@ package updater
 
 import (
 	"context"
-	"log"
+	"fmt"
 
-	"github.com/Quak1/chuy-gbf/internal/database"
 	"github.com/Quak1/chuy-gbf/internal/store"
 )
 
-func LoadData(download bool) error {
-	data, err := loadFile()
-	if err != nil {
-		return err
+func LoadData(download bool, q *store.Queries) (error, []string) {
+	var data *Data
+	var err error
+	if download {
+		data, err = fetchData()
+	} else {
+		data, err = loadFile()
 	}
-
-	db, err := database.InitDB()
 	if err != nil {
-		return err
+		return err, nil
 	}
-	defer db.Close()
 
 	items := parseData(data)
-	q := store.New(db)
 
+	var errorMsg []string
 	for _, item := range items {
 		if item.Rarity != "ssr" {
 			continue
@@ -30,9 +29,9 @@ func LoadData(download bool) error {
 
 		err := q.CreateItem(context.Background(), store.CreateItemParams(item.Item))
 		if err != nil {
-			log.Printf("%+v\n%v\n", item, err)
+			errorMsg = append(errorMsg, fmt.Sprintf("%+v\n%v\n", item, err))
 		}
 	}
 
-	return nil
+	return nil, errorMsg
 }

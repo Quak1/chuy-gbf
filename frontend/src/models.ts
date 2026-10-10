@@ -39,3 +39,10 @@ export interface ItemValue {
   value: string;
   color: string;
 }
+
+export interface DBUpdate {
+  id: number;
+  is_ok: boolean;
+  comments: string;
+  created_at: Date;
+}

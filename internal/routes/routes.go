@@ -26,6 +26,14 @@ func SetupRouter(db *sql.DB, distFS fs.FS) *chi.Mux {
 			w.Write([]byte("Pong"))
 		})
 
+		r.Route("/update-data", func(r chi.Router) {
+			r.Use(middleware.RequireUsername)
+			r.Use(middleware.IsAdminRole)
+
+			r.Post("/", itemsHandler.UpdateDBData)
+			r.Get("/last", itemsHandler.GetLastUpdate)
+		})
+
 		r.Route("/users", func(r chi.Router) {
 			r.Get("/", usersHandler.ListUsers)
 			r.Post("/", usersHandler.CreateUser)

@@ -6,7 +6,15 @@ package store
 
 import (
 	"database/sql"
+	"time"
 )
+
+type DbDataUpdate struct {
+	ID        int64     `json:"id"`
+	IsOk      bool      `json:"is_ok"`
+	Comments  string    `json:"comments"`
+	CreatedAt time.Time `json:"created_at"`
+}
 
 type Item struct {
 	ID       string `json:"id"`

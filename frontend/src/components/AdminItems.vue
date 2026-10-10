@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { useFetch } from "../composables/useFetch";
-import type { Item } from "../models";
+import type { DBUpdate, Item } from "../models";
 import { useUser } from "../composables/useUser";
 import { usePost } from "../composables/usePost";
 import { useRouter } from "vue-router";
@@ -11,7 +11,13 @@ import AdminItemSetupModal from "./AdminItemSetupModal.vue";
 const router = useRouter();
 const { user } = useUser();
 const { data, loading, error } = useFetch<Item[]>("/api/items");
+const { data: updateFetchData } = useFetch<DBUpdate>("/api/update-data/last");
 const { post, data: postData, error: postError } = usePost();
+const {
+  post: postUpdate,
+  data: dataUpdate,
+  error: errorUpdate,
+} = usePost<string[]>();
 const elementFilter = ref("");
 const typeFilter = ref("");
 const seriesFilter = ref("");
@@ -65,6 +71,20 @@ const toggleEnabled = async (item: Item) => {
     console.error(postError.value);
   }
 };
+
+const handlePostUpdateData = async () => {
+  const update = confirm("Are you sure you want to update DB data");
+  if (!update) return;
+
+  const ok = await postUpdate("/api/update-data", {});
+  if (!ok) {
+    console.error(errorUpdate);
+    alert("There was a server error updating DB data.");
+  } else if (dataUpdate.value) {
+    console.error(dataUpdate.value);
+    alert("Check logs for DB error messages.");
+  }
+};
 </script>
 
 <template>
@@ -77,10 +97,21 @@ const toggleEnabled = async (item: Item) => {
   <div class="container">
     <div v-if="loading">Loading</div>
     <div v-if="error">{{ error }}</div>
-    <label
-      >Search
-      <input type="text" v-model="searchFilter" />
-    </label>
+
+    <div class="top">
+      <label
+        >Search
+        <input type="text" v-model="searchFilter" />
+      </label>
+
+      <div>
+        <span v-if="updateFetchData"
+          >Last update: {{ updateFetchData.created_at }} |
+        </span>
+        <button @click="handlePostUpdateData">Update DB Data</button>
+      </div>
+    </div>
+
     <table v-if="filtered">
       <thead>
         <tr>
@@ -131,6 +162,9 @@ const toggleEnabled = async (item: Item) => {
   max-width: 1200px;
   margin: 0 auto;
 }
+table {
+  width: 100%;
+}
 td {
   word-break: break-word;
   overflow-wrap: break-word;
@@ -138,5 +172,10 @@ td {
 
 thead button {
   display: block;
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
 }
 </style>

@@ -10,8 +10,9 @@ import (
 )
 
 const (
-	dataURL  = "https://raw.githubusercontent.com/MizaGBF/GBFAL/main/json/data.json"
-	dataPath = "data.json"
+	dataURL      = "https://raw.githubusercontent.com/MizaGBF/GBFAL/main/json/data.json"
+	changelogURL = "https://raw.githubusercontent.com/MizaGBF/GBFAL/main/json/changelog.json"
+	dataPath     = "data.json"
 )
 
 type Changelog struct {
@@ -57,6 +58,21 @@ func decodeData(r io.Reader) (*Data, error) {
 	}
 
 	return &data, nil
+}
+
+func GetChangelog() (*Changelog, error) {
+	res, err := http.Get(dataURL)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	var c Changelog
+	if err := json.NewDecoder(res.Body).Decode(&c); err != nil {
+		return nil, err
+	}
+
+	return &c, nil
 }
 
 func fetchData() (*Data, error) {

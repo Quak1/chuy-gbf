@@ -1,10 +1,16 @@
 package handlers
 
 import (
+	"context"
+	"database/sql"
 	"errors"
+	"fmt"
 	"net/http"
+	"strings"
+	"time"
 
 	"github.com/Quak1/chuy-gbf/internal/store"
+	"github.com/Quak1/chuy-gbf/internal/updater"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 )
@@ -127,4 +133,54 @@ func (h *ItemsHandler) DeleteItemValue(w http.ResponseWriter, r *http.Request) {
 	}
 
 	render.NoContent(w, r)
+}
+
+func (h *ItemsHandler) UpdateDBData(w http.ResponseWriter, r *http.Request) {
+	update, err := h.query.GetLastDBDataUpdate(r.Context())
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		render.Render(w, r, ErrorServer(err))
+		return
+	}
+
+	if err == nil {
+		c, err := updater.GetChangelog()
+		if err != nil {
+			render.Render(w, r, ErrorServer(err))
+			return
+		}
+
+		t := time.UnixMilli(c.Timestamp)
+		if update.CreatedAt.After(t) {
+			render.JSON(w, r, fmt.Sprintf("Database already has latest data. Last updated: %v", update.CreatedAt))
+			return
+		}
+	}
+
+	err, errorMsg := updater.LoadData(true, h.query)
+	if err != nil {
+		render.Render(w, r, ErrorServer(err))
+		return
+	}
+
+	err = h.query.AddDBDataUpdate(context.Background(), store.AddDBDataUpdateParams{
+		IsOk:     err == nil,
+		Comments: strings.Join(errorMsg, "\n\n"),
+	})
+
+	if errorMsg != nil {
+		render.JSON(w, r, errorMsg)
+		return
+	}
+
+	render.NoContent(w, r)
+}
+
+func (h *ItemsHandler) GetLastUpdate(w http.ResponseWriter, r *http.Request) {
+	update, err := h.query.GetLastDBDataUpdate(r.Context())
+	if err != nil {
+		render.Render(w, r, ErrorServer(err))
+		return
+	}
+
+	render.JSON(w, r, update)
 }
