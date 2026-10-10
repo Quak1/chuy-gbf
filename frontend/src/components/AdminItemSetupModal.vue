@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { watch } from "vue";
 import { useFetch } from "../composables/useFetch";
 import type { Item, ItemValue } from "../models";
 import Modal from "./Modal.vue";
@@ -11,42 +11,58 @@ const props = defineProps<{
 
 const emit = defineEmits(["close", "updated"]);
 
-const isCreating = ref(false);
 const { data, loading, error } = useFetch<ItemValue[]>(
   `/api/items/${props.item.id}/values`,
 );
 
-const handleAdd = () => {
-  isCreating.value = true;
+let tempId = -1;
+
+const addEmptyValue = () => {
   if (!data.value) data.value = [];
 
+  const lastItem = data.value.at(-1);
+  if (lastItem && lastItem.id < 0) return;
+
   data.value.push({
-    id: 0,
+    id: tempId--,
     item_id: props.item.id,
     value: "0",
-    color: "#000000",
+    color: "#FFFFFF",
   });
 };
 
+watch(
+  data,
+  (newData) => {
+    if (newData) addEmptyValue();
+  },
+  { immediate: true },
+);
+
 const handleDelete = (value: ItemValue) => {
-  data.value = data.value?.filter((v) => v.id !== value.id) || [];
+  if (!data.value) return;
+  data.value = data.value.filter((v) => v.id !== value.id);
 };
 
 const handleCreate = (value: ItemValue) => {
-  isCreating.value = false;
   if (!data.value) return;
-  const index = data.value.findIndex((v) => v.id === 0);
-  if (index !== -1) data.value[index] = value;
+
+  const lastIndex = data.value.length - 1;
+  if (data.value[lastIndex].id < 0) {
+    data.value[lastIndex] = value;
+    addEmptyValue();
+  }
+
+  console.log(data.value);
 };
 </script>
 
 <template>
-  <Modal @close="$emit('close')">
+  <Modal @close="emit('close')">
     <div>
       <h3>Edit values {{ item.name }}</h3>
 
       <ValuePicker
-        v-if="data"
         v-for="value in data"
         :value="value"
         :key="value.id"
@@ -55,7 +71,6 @@ const handleCreate = (value: ItemValue) => {
       />
 
       <div class="buttons">
-        <button @click="handleAdd" :disabled="isCreating">Add Value</button>
         <button @click="emit('close')" :disabled="loading">Close</button>
       </div>
 
@@ -64,3 +79,17 @@ const handleCreate = (value: ItemValue) => {
     </div>
   </Modal>
 </template>
+
+<style>
+dialog {
+  background-color: var(--accent);
+  width: fit-content;
+}
+.buttons {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  gap: 5px;
+  margin-top: 10px;
+}
+</style>

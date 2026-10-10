@@ -94,6 +94,10 @@ func (h *ItemsHandler) GetItemValues(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if values == nil {
+		values = []store.ItemValue{}
+	}
+
 	render.JSON(w, r, values)
 }
 

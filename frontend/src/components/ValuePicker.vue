@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import type { ItemValue } from "../models";
 import { useAPI } from "../composables/useAPI";
 import { usePost } from "../composables/usePost";
@@ -18,6 +18,7 @@ const defaultColors = ["#11734b", "#d4edbc", "#ffe6a0", "#ffcfc9", "#b10202"];
 const itemValue = ref(props.value);
 const draftColor = ref(itemValue.value.color);
 const draftValue = ref(itemValue.value.value);
+const validValue = computed(() => itemValue.value.id > 0);
 
 const { call, data, error, loading } = useAPI();
 const {
@@ -53,20 +54,21 @@ const handleCreate = async () => {
 
 <template>
   <div :inert="loading || postLoading">
-    <span :inert="!!itemValue.id">
+    <span :inert="validValue">
       <input type="text" v-model="draftValue" />
       <input type="color" v-model="draftColor" />
 
       <button
         class="defaultColor"
+        v-if="!validValue"
         v-for="color in defaultColors"
         :style="{ backgroundColor: color }"
         @click="draftColor = color"
       ></button>
     </span>
 
-    <button v-if="itemValue.id" @click="handleDelete">Delete</button>
-    <button v-if="!itemValue.id" @click="handleCreate">Save</button>
+    <button v-if="validValue" @click="handleDelete">Delete</button>
+    <button v-if="!validValue" @click="handleCreate">Save</button>
 
     <p>{{ error }}</p>
     <p>{{ postError }}</p>
@@ -77,6 +79,14 @@ const handleCreate = async () => {
 div {
   border: 1px solid var(--border);
   border-radius: 10px;
+  display: flex;
+  align-items: center;
+  padding: 5px;
+
+  span {
+    display: flex;
+    align-items: center;
+  }
 }
 .defaultColor {
   margin: 3px;
