@@ -46,3 +46,7 @@ ON CONFLICT DO UPDATE SET item_value_id = excluded.item_value_id;
 UPDATE users
 SET comment = ?
 WHERE id = ?;
+
+-- name: DeleteUser :exec
+DELETE FROM users
+WHERE id = ?;

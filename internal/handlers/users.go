@@ -239,3 +239,15 @@ func (h *UserHandler) GetAllUsersItems(w http.ResponseWriter, r *http.Request) {
 		Items: items,
 	})
 }
+
+func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
+	user := r.Context().Value(UserContextKey).(store.User)
+
+	err := h.query.DeleteUser(r.Context(), user.ID)
+	if err != nil {
+		render.Render(w, r, ErrorServer(err))
+		return
+	}
+
+	render.NoContent(w, r)
+}
