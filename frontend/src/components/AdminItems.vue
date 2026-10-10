@@ -7,6 +7,7 @@ import { usePost } from "../composables/usePost";
 import { useRouter } from "vue-router";
 import { useModal } from "../composables/useModal";
 import AdminItemSetupModal from "./AdminItemSetupModal.vue";
+import ItemImage from "./ItemImage.vue";
 
 const router = useRouter();
 const { user } = useUser();
@@ -140,7 +141,10 @@ const handlePostUpdateData = async () => {
       </thead>
       <tbody>
         <tr v-for="item in filtered" :key="item.id">
-          <td>{{ item.id }}</td>
+          <td>
+            <ItemImage :item="item" />
+            {{ item.id }}
+          </td>
           <td>{{ item.name }}</td>
           <td>{{ item.element }}</td>
           <td>{{ item.type }}</td>
@@ -168,6 +172,10 @@ table {
 td {
   word-break: break-word;
   overflow-wrap: break-word;
+}
+tr td:first-child {
+  width: 100px;
+  text-align: center;
 }
 
 thead button {
