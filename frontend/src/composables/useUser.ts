@@ -24,7 +24,7 @@ export function useUser(redirect: boolean = true) {
     try {
       const val = JSON.parse(stored);
       const id = parseInt(val.id);
-      user.value = { id, username: val.username, role: val.role };
+      user.value = { id, username: val.username, role: val.role, comment: "" };
     } catch (e) {
       console.error("Error parsing localStorage");
     }

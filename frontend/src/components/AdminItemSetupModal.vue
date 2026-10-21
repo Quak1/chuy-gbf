@@ -26,7 +26,7 @@ const addEmptyValue = () => {
   data.value.push({
     id: tempId--,
     item_id: props.item.id,
-    value: "0",
+    value: "",
     color: "#FFFFFF",
   });
 };
