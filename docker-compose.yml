@@ -1,12 +1,22 @@
 services:
   gbfapp:
-    image: quak1/chuy-gbf:latest
+    image: chuy-gbf:latest
     container_name: chuy-gbf
     restart: unless-stopped
-    ports:
-      - "127.0.0.1:8080:8080"
+    networks:
+      - caddy_net
     volumes:
       - data:/data
+    labels:
+      caddy: gbf.hatvault.win
+      caddy.request_body.max_size: 10MB
+      caddy.reverse_proxy: "{{upstreams 8080}}"
+      caddy.reverse_proxy.transport: http
+      caddy.reverse_proxy.transport.read_timeout: 360s
 
 volumes:
   data:
+
+networks:
+  caddy_net:
+    external: true
