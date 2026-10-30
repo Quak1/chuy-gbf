@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS item_values (
     ),
   UNIQUE(item_id, value),
   UNIQUE(id, item_id),
-  FOREIGN KEY (item_id) REFERENCES items(id)
+  FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE
 );
 
 -- +goose Down

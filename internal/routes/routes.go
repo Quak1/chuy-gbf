@@ -46,7 +46,7 @@ func SetupRouter(db *sql.DB, distFS fs.FS) *chi.Mux {
 				r.Use(middleware.UserCtx)
 
 				r.Get("/", usersHandler.GetUser)
-				r.Delete("/", usersHandler.DeleteUser)
+				r.With(middleware.RequireUsername).With(middleware.IsAdminRole).Delete("/", usersHandler.DeleteUser)
 				r.With(middleware.RequireUsername).Post("/comments", usersHandler.SetUserComment)
 
 				r.Route("/items", func(r chi.Router) {

@@ -3,13 +3,15 @@ import { computed, ref } from "vue";
 import EditItemModal from "./EditItemModal.vue";
 import type { UserItem, User } from "../models";
 import { useFetch } from "../composables/useFetch";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import ElementSelector from "./ElementSelector.vue";
 import ItemImage from "./ItemImage.vue";
 import { useModal } from "../composables/useModal";
 import AddCommentModal from "./AddCommentModal.vue";
 import HoverTooltip from "./HoverTooltip.vue";
 import CommentIcon from "./icons/CommentIcon.vue";
+import { useAPI } from "../composables/useAPI";
+import { useUser } from "../composables/useUser";
 
 const elementFilter = ref("dark");
 const { selectedData, openModal, closeModal } = useModal<UserItem>();
@@ -29,6 +31,9 @@ const { data, loading } = useFetch<UserItem[]>(
   `/api/users/${userID.value}/items`,
 );
 const { data: userData } = useFetch<User>(`/api/users/${userID.value}`);
+const { call, error: apiError } = useAPI();
+const { user } = useUser();
+const router = useRouter();
 
 function handleItemUpdate(updatedItem: UserItem) {
   if (!data.value) return;
@@ -49,6 +54,18 @@ const filteredItems = computed(() => {
   if (!data.value) return [];
   return data.value.filter((item) => item.element == elementFilter.value);
 });
+
+const handleDeleteUser = async () => {
+  const username = userData.value?.username;
+  const id = userData.value?.id;
+  if (!confirm(`Delete user '${username}' with id:${id}`)) {
+    return;
+  }
+
+  const ok = await call(`/api/users/${id}`, { method: "DELETE" });
+  if (!ok) alert(apiError);
+  else router.push({ name: "Home" });
+};
 </script>
 
 <template>
@@ -60,7 +77,10 @@ const filteredItems = computed(() => {
       @update="(e) => (elementFilter = e)"
     />
 
-    <div v-if="userData" class="comment-container">
+    <div
+      v-if="userData && user?.role !== 'admin'"
+      class="center comment-container"
+    >
       <button @click="openCommentModal('commenting')">
         {{ userData.comment ? "Edit" : "Add" }} user comment
       </button>
@@ -70,6 +90,10 @@ const filteredItems = computed(() => {
         </template>
         {{ userData.comment }}
       </HoverTooltip>
+    </div>
+
+    <div v-if="user?.role === 'admin'" class="center">
+      <button @click="handleDeleteUser">Delete user</button>
     </div>
 
     <div class="container">
@@ -100,10 +124,13 @@ const filteredItems = computed(() => {
 </template>
 
 <style scoped>
-.comment-container {
+.center {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.comment-container {
   gap: 10px;
   margin: 10px;
 

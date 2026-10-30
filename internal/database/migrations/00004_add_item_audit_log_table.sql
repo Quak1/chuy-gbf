@@ -6,8 +6,8 @@ CREATE TABLE IF NOT EXISTS item_audit_log (
   old_value TEXT NOT NULL,
   new_value TEXT NOT NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(id),
-  FOREIGN KEY (item_id) REFERENCES items(id)
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+  FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE SET NULL
 );
 
 -- +goose Down
