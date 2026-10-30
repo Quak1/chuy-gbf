@@ -110,7 +110,7 @@ const handlePostUpdateData = async () => {
           >Last update: {{ updateFetchData.created_at }} |
         </span>
         <button @click="handlePostUpdateData">Update DB Data</button>
-        | <a href="/api/database/backup">Download BD backup</a>
+        | <a href="/api/database/backup">Download DB backup</a>
       </div>
     </div>
 
