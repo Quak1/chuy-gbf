@@ -61,7 +61,7 @@ func decodeData(r io.Reader) (*Data, error) {
 }
 
 func GetChangelog() (*Changelog, error) {
-	res, err := http.Get(dataURL)
+	res, err := http.Get(changelogURL)
 	if err != nil {
 		return nil, err
 	}

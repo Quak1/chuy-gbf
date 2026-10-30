@@ -2,8 +2,9 @@
 SELECT * FROM items;
 
 -- name: CreateItem :exec
-INSERT OR REPLACE INTO items (id, name, element, type, series, enabled, category)
-VALUES (?, ?, ?, ?, ?, ?, ?);
+INSERT INTO items (id, name, element, type, series, enabled, category)
+VALUES (?, ?, ?, ?, ?, ?, ?)
+ON CONFLICT(id) DO NOTHING;
 
 -- name: EnableItem :exec
 UPDATE items

@@ -10,8 +10,9 @@ import (
 )
 
 const createItem = `-- name: CreateItem :exec
-INSERT OR REPLACE INTO items (id, name, element, type, series, enabled, category)
+INSERT INTO items (id, name, element, type, series, enabled, category)
 VALUES (?, ?, ?, ?, ?, ?, ?)
+ON CONFLICT(id) DO NOTHING
 `
 
 type CreateItemParams struct {

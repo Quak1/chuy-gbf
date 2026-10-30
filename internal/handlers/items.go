@@ -155,7 +155,7 @@ func (h *ItemsHandler) UpdateDBData(w http.ResponseWriter, r *http.Request) {
 
 		t := time.UnixMilli(c.Timestamp)
 		if update.CreatedAt.After(t) {
-			render.JSON(w, r, fmt.Sprintf("Database already has latest data. Last updated: %v", update.CreatedAt))
+			render.JSON(w, r, fmt.Sprintf("Database already has latest data. Last DB Update: %v. Lastest data: %v", update.CreatedAt, t))
 			return
 		}
 	}
