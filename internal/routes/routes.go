@@ -31,8 +31,8 @@ func SetupRouter(db *sql.DB, distFS fs.FS) *chi.Mux {
 			r.Use(middleware.RequireUsername)
 			r.Use(middleware.IsAdminRole)
 
-			r.Post("/", itemsHandler.UpdateDBData)
-			r.Get("/last", itemsHandler.GetLastUpdate)
+			r.Post("/", dbHandler.UpdateDBData)
+			r.Get("/last", dbHandler.GetLastUpdate)
 		})
 
 		r.Route("/users", func(r chi.Router) {

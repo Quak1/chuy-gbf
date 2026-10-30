@@ -9,6 +9,11 @@ import { useModal } from "../composables/useModal";
 import AdminItemSetupModal from "./AdminItemSetupModal.vue";
 import ItemImage from "./ItemImage.vue";
 
+type UpdateDBResponse = {
+  message: string;
+  errors?: string[];
+};
+
 const router = useRouter();
 const { user } = useUser();
 const { data, loading, error } = useFetch<Item[]>("/api/items");
@@ -18,7 +23,7 @@ const {
   post: postUpdate,
   data: dataUpdate,
   error: errorUpdate,
-} = usePost<string[]>();
+} = usePost<UpdateDBResponse>();
 const elementFilter = ref("");
 const typeFilter = ref("");
 const seriesFilter = ref("");
@@ -73,17 +78,25 @@ const toggleEnabled = async (item: Item) => {
   }
 };
 
-const handlePostUpdateData = async () => {
-  const update = confirm("Are you sure you want to update DB data");
+const handlePostUpdateData = async (forceUpdate = false) => {
+  const update = confirm(
+    `Are you sure you want to${forceUpdate ? " FORCE" : ""} update DB data?`,
+  );
   if (!update) return;
 
-  const ok = await postUpdate("/api/update-data", {});
+  const payload = forceUpdate ? { force: true } : {};
+  const ok = await postUpdate("/api/update-data", payload);
   if (!ok) {
-    console.error(errorUpdate);
+    console.error(errorUpdate.value);
     alert("There was a server error updating DB data.");
-  } else if (dataUpdate.value) {
-    console.error(dataUpdate.value);
+  } else if (dataUpdate.value?.errors) {
+    console.error(dataUpdate.value.errors);
     alert("Check logs for DB error messages.");
+  } else if (dataUpdate.value?.message) {
+    const force = confirm(`${dataUpdate.value.message}. Try force update?`);
+    if (force) handlePostUpdateData(true);
+  } else {
+    alert("Successful database data update.");
   }
 };
 </script>
@@ -109,7 +122,7 @@ const handlePostUpdateData = async () => {
         <span v-if="updateFetchData"
           >Last update: {{ updateFetchData.created_at }} |
         </span>
-        <button @click="handlePostUpdateData">Update DB Data</button>
+        <button @click="handlePostUpdateData(false)">Update DB Data</button>
         | <a href="/api/database/backup">Download DB backup</a>
       </div>
     </div>
