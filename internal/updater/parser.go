@@ -44,6 +44,10 @@ func parseLookup(id, input string, lists *CategoryLists) DataItem {
 			item.Series = value
 		case 'w':
 			item.WikiPath = value
+		case 'm':
+			item.Element = "any"
+			item.Rarity = "ssr"
+			item.Category = "character"
 		}
 	}
 

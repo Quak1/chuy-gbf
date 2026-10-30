@@ -10,6 +10,7 @@ export function getItemImageURL(item: Item, useHighRes = false): string {
 
   switch (item.category) {
     case "character":
+      if (item.type === "") return `${url}/leader/m/${item.id}_01.jpg`;
       return `${url}/npc/m/${item.id}_01.jpg`;
     case "summon":
       return `${url}/summon/m/${item.id}.jpg`;
