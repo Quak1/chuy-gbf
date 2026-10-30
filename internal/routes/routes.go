@@ -20,6 +20,7 @@ func SetupRouter(db *sql.DB, distFS fs.FS) *chi.Mux {
 	middleware := handlers.NewMiddlware(q)
 	usersHandler := handlers.NewUsersHandler(q)
 	itemsHandler := handlers.NewItemsHandler(q)
+	dbHandler := handlers.NewDatabaseHandler(q, db)
 
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
@@ -72,6 +73,13 @@ func SetupRouter(db *sql.DB, distFS fs.FS) *chi.Mux {
 					r.With(middleware.URLIntID("valueID")).Delete("/{valueID:[0-9]+}", itemsHandler.DeleteItemValue)
 				})
 			})
+		})
+
+		r.Route("/database", func(r chi.Router) {
+			r.Use(middleware.RequireUsername)
+			r.Use(middleware.IsAdminRole)
+
+			r.Get("/backup", dbHandler.BackupDatabase)
 		})
 	})
 
