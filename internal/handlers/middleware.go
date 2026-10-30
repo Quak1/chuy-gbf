@@ -90,8 +90,10 @@ func (m *Middleware) RequireUsername(next http.Handler) http.Handler {
 		if err != nil {
 			if errors.Is(err, http.ErrNoCookie) {
 				render.Render(w, r, ErrorInvalidRequest(err))
+				return
 			}
 			render.Render(w, r, ErrorServer(err))
+			return
 		}
 
 		ctx := context.WithValue(r.Context(), contextKey(UsernameKey), cookie.Value)
