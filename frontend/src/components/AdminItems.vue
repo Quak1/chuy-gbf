@@ -142,7 +142,7 @@ const handlePostUpdateData = async () => {
       <tbody>
         <tr v-for="item in filtered" :key="item.id">
           <td>
-            <ItemImage :item="item" />
+            <ItemImage :item="item" loading="lazy" />
             {{ item.id }}
           </td>
           <td>{{ item.name }}</td>

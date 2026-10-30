@@ -94,6 +94,7 @@ const filteredItems = computed(() => {
 
 .table-container {
   overflow-x: auto;
+  padding-bottom: 100px;
 }
 
 table {
