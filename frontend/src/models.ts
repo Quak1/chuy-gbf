@@ -18,6 +18,7 @@ export interface Item {
   series: string;
   enabled: boolean;
   category: string;
+  wiki_path: string;
 }
 
 export interface User {

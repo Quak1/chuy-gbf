@@ -160,7 +160,7 @@ button {
   flex-direction: column;
   gap: 8px;
 
-  img {
+  a {
     align-self: center;
   }
 

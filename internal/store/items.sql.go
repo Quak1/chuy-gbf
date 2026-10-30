@@ -10,9 +10,10 @@ import (
 )
 
 const createItem = `-- name: CreateItem :exec
-INSERT INTO items (id, name, element, type, series, enabled, category)
-VALUES (?, ?, ?, ?, ?, ?, ?)
-ON CONFLICT(id) DO NOTHING
+INSERT INTO items (id, name, element, type, series, enabled, category, wiki_path)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+ON CONFLICT(id) DO UPDATE SET
+  wiki_path=excluded.wiki_path
 `
 
 type CreateItemParams struct {
@@ -23,6 +24,7 @@ type CreateItemParams struct {
 	Series   string `json:"series"`
 	Enabled  bool   `json:"enabled"`
 	Category string `json:"category"`
+	WikiPath string `json:"wiki_path"`
 }
 
 func (q *Queries) CreateItem(ctx context.Context, arg CreateItemParams) error {
@@ -34,6 +36,7 @@ func (q *Queries) CreateItem(ctx context.Context, arg CreateItemParams) error {
 		arg.Series,
 		arg.Enabled,
 		arg.Category,
+		arg.WikiPath,
 	)
 	return err
 }
@@ -99,7 +102,7 @@ func (q *Queries) EnableItem(ctx context.Context, id string) error {
 }
 
 const getAllItems = `-- name: GetAllItems :many
-SELECT id, name, element, type, series, enabled, category FROM items
+SELECT id, name, element, type, series, enabled, category, wiki_path FROM items
 `
 
 func (q *Queries) GetAllItems(ctx context.Context) ([]Item, error) {
@@ -119,6 +122,7 @@ func (q *Queries) GetAllItems(ctx context.Context) ([]Item, error) {
 			&i.Series,
 			&i.Enabled,
 			&i.Category,
+			&i.WikiPath,
 		); err != nil {
 			return nil, err
 		}
@@ -176,7 +180,7 @@ func (q *Queries) GetAllSelectedItemValues(ctx context.Context) ([]GetAllSelecte
 }
 
 const getEnabledItems = `-- name: GetEnabledItems :many
-SELECT id, name, element, type, series, enabled, category FROM items
+SELECT id, name, element, type, series, enabled, category, wiki_path FROM items
 WHERE enabled = 1
 `
 
@@ -197,6 +201,7 @@ func (q *Queries) GetEnabledItems(ctx context.Context) ([]Item, error) {
 			&i.Series,
 			&i.Enabled,
 			&i.Category,
+			&i.WikiPath,
 		); err != nil {
 			return nil, err
 		}

@@ -143,10 +143,12 @@ const handlePostUpdateData = async () => {
       <tbody>
         <tr v-for="item in filtered" :key="item.id">
           <td>
-            <ItemImage :item="item" loading="lazy" />
+            <ItemImage :item="item" lazyLoading />
             {{ item.id }}
           </td>
-          <td>{{ item.name }}</td>
+          <td>
+            {{ item.name }}
+          </td>
           <td>{{ item.element }}</td>
           <td>{{ item.type }}</td>
           <td>{{ item.series }}</td>

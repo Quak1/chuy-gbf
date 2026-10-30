@@ -114,7 +114,7 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 
 const getUserItems = `-- name: GetUserItems :many
 SELECT
-  i.id, i.name, i.element, i.type, i.series, i.enabled, i.category,
+  i.id, i.name, i.element, i.type, i.series, i.enabled, i.category, i.wiki_path,
   COALESCE(iv.id, 0) AS item_value_id,
   COALESCE(iv.value, '') AS value,
   COALESCE(iv.color, '') AS color
@@ -132,6 +132,7 @@ type GetUserItemsRow struct {
 	Series      string `json:"series"`
 	Enabled     bool   `json:"enabled"`
 	Category    string `json:"category"`
+	WikiPath    string `json:"wiki_path"`
 	ItemValueID int64  `json:"item_value_id"`
 	Value       string `json:"value"`
 	Color       string `json:"color"`
@@ -154,6 +155,7 @@ func (q *Queries) GetUserItems(ctx context.Context, userID int64) ([]GetUserItem
 			&i.Series,
 			&i.Enabled,
 			&i.Category,
+			&i.WikiPath,
 			&i.ItemValueID,
 			&i.Value,
 			&i.Color,

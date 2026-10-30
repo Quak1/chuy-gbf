@@ -24,6 +24,7 @@ type Item struct {
 	Series   string `json:"series"`
 	Enabled  bool   `json:"enabled"`
 	Category string `json:"category"`
+	WikiPath string `json:"wiki_path"`
 }
 
 type ItemAuditLog struct {

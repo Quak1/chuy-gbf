@@ -2,9 +2,10 @@
 SELECT * FROM items;
 
 -- name: CreateItem :exec
-INSERT INTO items (id, name, element, type, series, enabled, category)
-VALUES (?, ?, ?, ?, ?, ?, ?)
-ON CONFLICT(id) DO NOTHING;
+INSERT INTO items (id, name, element, type, series, enabled, category, wiki_path)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+ON CONFLICT(id) DO UPDATE SET
+  wiki_path=excluded.wiki_path;
 
 -- name: EnableItem :exec
 UPDATE items
