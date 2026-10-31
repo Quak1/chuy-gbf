@@ -70,7 +70,7 @@ type GetTeamSlotsRow struct {
 	TeamUrl    string         `json:"team_url"`
 	Category   sql.NullString `json:"category"`
 	Position   sql.NullInt64  `json:"position"`
-	ItemID     sql.NullInt64  `json:"item_id"`
+	ItemID     sql.NullString `json:"item_id"`
 	ID         sql.NullString `json:"id"`
 	Name       sql.NullString `json:"name"`
 	Element    sql.NullString `json:"element"`
@@ -158,7 +158,7 @@ JOIN team_slots ts ON ts.team_id = t.id
 WHERE ts.item_id = ?
 `
 
-func (q *Queries) ListTeamsByItemId(ctx context.Context, itemID int64) ([]Team, error) {
+func (q *Queries) ListTeamsByItemId(ctx context.Context, itemID string) ([]Team, error) {
 	rows, err := q.db.QueryContext(ctx, listTeamsByItemId, itemID)
 	if err != nil {
 		return nil, err
@@ -198,7 +198,7 @@ type SetSlotParams struct {
 	TeamID   int64  `json:"team_id"`
 	Category string `json:"category"`
 	Position int64  `json:"position"`
-	ItemID   int64  `json:"item_id"`
+	ItemID   string `json:"item_id"`
 }
 
 // -------------------------

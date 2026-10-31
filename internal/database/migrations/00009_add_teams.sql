@@ -9,7 +9,7 @@ CREATE TABLE teams (
 
 CREATE TABLE team_slots (
   team_id  INTEGER NOT NULL,
-  item_id  INTEGER NOT NULL,
+  item_id  TEXT    NOT NULL,
   category TEXT    NOT NULL CHECK (category IN ('character', 'summon', 'weapon')),
   position INTEGER NOT NULL,
 
@@ -28,6 +28,7 @@ CREATE TABLE team_slots (
 ) WITHOUT ROWID;
 
 CREATE INDEX team_slots_item_idx ON team_slots(item_id);
+CREATE UNIQUE INDEX items_id_category_uq ON items(id, category);
 
 
 -- +goose Down

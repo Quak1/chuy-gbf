@@ -21,6 +21,7 @@ func SetupRouter(db *sql.DB, distFS fs.FS) *chi.Mux {
 	usersHandler := handlers.NewUsersHandler(q)
 	itemsHandler := handlers.NewItemsHandler(q)
 	dbHandler := handlers.NewDatabaseHandler(q, db)
+	teamsHandler := handlers.NewTeamsHandler(q, db)
 
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
@@ -43,7 +44,7 @@ func SetupRouter(db *sql.DB, distFS fs.FS) *chi.Mux {
 			r.Get("/items", usersHandler.GetAllUsersItems)
 
 			r.Route("/{userID:[0-9]+}", func(r chi.Router) {
-				r.Use(middleware.URLIntID("userID"))
+				r.Use(middleware.URLIntID("userID", handlers.UserIDKey))
 				r.Use(middleware.UserCtx)
 
 				r.Get("/", usersHandler.GetUser)
@@ -71,7 +72,7 @@ func SetupRouter(db *sql.DB, distFS fs.FS) *chi.Mux {
 
 				r.Route("/values", func(r chi.Router) {
 					r.Post("/", itemsHandler.CreateItemValue)
-					r.With(middleware.URLIntID("valueID")).Delete("/{valueID:[0-9]+}", itemsHandler.DeleteItemValue)
+					r.With(middleware.URLIntID("valueID", handlers.ValueIDKey)).Delete("/{valueID:[0-9]+}", itemsHandler.DeleteItemValue)
 				})
 			})
 		})
@@ -81,6 +82,19 @@ func SetupRouter(db *sql.DB, distFS fs.FS) *chi.Mux {
 			r.Use(middleware.IsAdminRole)
 
 			r.Get("/backup", dbHandler.BackupDatabase)
+		})
+
+		r.Route("/teams", func(r chi.Router) {
+			r.Use(middleware.RequireUsername)
+
+			r.Get("/", teamsHandler.ListTeams)
+			r.Post("/", teamsHandler.CreateTeam)
+
+			r.Route("/{teamID:[0-9]+}", func(r chi.Router) {
+				r.Use(middleware.URLIntID("teamID", handlers.TeamIDKey))
+				r.Put("/", teamsHandler.UpdateTeam)
+				r.Delete("/", teamsHandler.DeleteTeam)
+			})
 		})
 	})
 

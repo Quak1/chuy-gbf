@@ -53,7 +53,7 @@ type Team struct {
 
 type TeamSlot struct {
 	TeamID   int64  `json:"team_id"`
-	ItemID   int64  `json:"item_id"`
+	ItemID   string `json:"item_id"`
 	Category string `json:"category"`
 	Position int64  `json:"position"`
 }

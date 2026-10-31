@@ -28,18 +28,21 @@ type contextKey string
 const (
 	UserContextKey contextKey = "user"
 	UsernameKey    contextKey = "username"
+	UserIDKey      contextKey = "userID"
+	ValueIDKey     contextKey = "valueID"
+	TeamIDKey      contextKey = "team"
 )
 
-func (m *Middleware) URLIntID(key string) func(http.Handler) http.Handler {
+func (m *Middleware) URLIntID(param string, key contextKey) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			v, err := strconv.ParseInt(chi.URLParam(r, key), 10, 64)
+			v, err := strconv.ParseInt(chi.URLParam(r, param), 10, 64)
 			if err != nil {
 				render.Render(w, r, ErrorInvalidRequest(err))
 				return
 			}
 
-			ctx := context.WithValue(r.Context(), contextKey(key), v)
+			ctx := context.WithValue(r.Context(), key, v)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
