@@ -15,18 +15,17 @@ SELECT * FROM teams ORDER BY id;
 -- name: SetTeamUpdated :exec
 UPDATE teams SET updated_at = datetime('now') WHERE id = ?;
 
+-- name: GetTeam :one
+SELECT * FROM teams
+WHERE teams.id = ?;
+
 -- name: GetTeamSlots :many
 SELECT
-  t.id AS team_id,
-  t.name AS team_name,
-  t.url AS team_url,
-  ts.category,
   ts.position,
-  ts.item_id,
   i.*
 FROM teams t
-LEFT JOIN team_slots ts ON t.id = ts.team_id
-LEFT JOIN items i ON ts.item_id = i.id
+JOIN team_slots ts ON t.id = ts.team_id
+JOIN items i ON ts.item_id = i.id
 WHERE t.id = ?
 ORDER BY
   ts.category,

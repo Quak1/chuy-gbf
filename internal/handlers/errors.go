@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"database/sql"
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/render"
@@ -60,4 +62,13 @@ func ErrorParse(key string) render.Renderer {
 var ErrorForbidden = &ErrResponse{
 	StatusCode: http.StatusForbidden,
 	ErrorMsg:   "You don't have access to this resource",
+}
+
+func HandleDatabaseError(w http.ResponseWriter, r *http.Request, err error) {
+	if errors.Is(err, sql.ErrNoRows) {
+		render.Render(w, r, ErrorNotFound)
+		return
+	}
+
+	render.Render(w, r, ErrorServer(err))
 }

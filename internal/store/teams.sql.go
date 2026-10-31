@@ -7,7 +7,6 @@ package store
 
 import (
 	"context"
-	"database/sql"
 )
 
 const clearSlot = `-- name: ClearSlot :exec
@@ -46,18 +45,31 @@ func (q *Queries) DeleteTeam(ctx context.Context, id int64) error {
 	return err
 }
 
+const getTeam = `-- name: GetTeam :one
+SELECT id, name, url, created_at, updated_at FROM teams 
+WHERE teams.id = ?
+`
+
+func (q *Queries) GetTeam(ctx context.Context, id int64) (Team, error) {
+	row := q.db.QueryRowContext(ctx, getTeam, id)
+	var i Team
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Url,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getTeamSlots = `-- name: GetTeamSlots :many
 SELECT
-  t.id AS team_id,
-  t.name AS team_name,
-  t.url AS team_url,
-  ts.category,
   ts.position,
-  ts.item_id,
   i.id, i.name, i.element, i.type, i.series, i.enabled, i.category, i.wiki_path
 FROM teams t
-LEFT JOIN team_slots ts ON t.id = ts.team_id
-LEFT JOIN items i ON ts.item_id = i.id
+JOIN team_slots ts ON t.id = ts.team_id
+JOIN items i ON ts.item_id = i.id
 WHERE t.id = ?
 ORDER BY
   ts.category,
@@ -65,20 +77,15 @@ ORDER BY
 `
 
 type GetTeamSlotsRow struct {
-	TeamID     int64          `json:"team_id"`
-	TeamName   string         `json:"team_name"`
-	TeamUrl    string         `json:"team_url"`
-	Category   sql.NullString `json:"category"`
-	Position   sql.NullInt64  `json:"position"`
-	ItemID     sql.NullString `json:"item_id"`
-	ID         sql.NullString `json:"id"`
-	Name       sql.NullString `json:"name"`
-	Element    sql.NullString `json:"element"`
-	Type       sql.NullString `json:"type"`
-	Series     sql.NullString `json:"series"`
-	Enabled    sql.NullBool   `json:"enabled"`
-	Category_2 sql.NullString `json:"category_2"`
-	WikiPath   sql.NullString `json:"wiki_path"`
+	Position int64  `json:"position"`
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	Element  string `json:"element"`
+	Type     string `json:"type"`
+	Series   string `json:"series"`
+	Enabled  bool   `json:"enabled"`
+	Category string `json:"category"`
+	WikiPath string `json:"wiki_path"`
 }
 
 func (q *Queries) GetTeamSlots(ctx context.Context, id int64) ([]GetTeamSlotsRow, error) {
@@ -91,19 +98,14 @@ func (q *Queries) GetTeamSlots(ctx context.Context, id int64) ([]GetTeamSlotsRow
 	for rows.Next() {
 		var i GetTeamSlotsRow
 		if err := rows.Scan(
-			&i.TeamID,
-			&i.TeamName,
-			&i.TeamUrl,
-			&i.Category,
 			&i.Position,
-			&i.ItemID,
 			&i.ID,
 			&i.Name,
 			&i.Element,
 			&i.Type,
 			&i.Series,
 			&i.Enabled,
-			&i.Category_2,
+			&i.Category,
 			&i.WikiPath,
 		); err != nil {
 			return nil, err
