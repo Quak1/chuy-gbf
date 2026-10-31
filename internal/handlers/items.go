@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/Quak1/chuy-gbf/internal/store"
@@ -51,6 +52,36 @@ func (h *ItemsHandler) GetItems(w http.ResponseWriter, r *http.Request) {
 	}
 
 	render.JSON(w, r, items)
+}
+
+func (h *ItemsHandler) GetItemsByCategory(w http.ResponseWriter, r *http.Request) {
+	items, err := h.query.GetAllItems(r.Context())
+	if err != nil {
+		render.Render(w, r, ErrorServer(err))
+		return
+	}
+
+	var res struct {
+		Characters []store.Item `json:"characters"`
+		Summons    []store.Item `json:"summons"`
+		Weapons    []store.Item `json:"weapons"`
+	}
+
+	for _, item := range items {
+		switch item.Category {
+		case "character":
+			res.Characters = append(res.Characters, item)
+		case "summon":
+			res.Summons = append(res.Summons, item)
+		case "weapon":
+			res.Weapons = append(res.Weapons, item)
+		default:
+			render.Render(w, r, ErrorServer(fmt.Errorf("Unknown category %v for item %v", item.Category, item.Name)))
+			return
+		}
+	}
+
+	render.JSON(w, r, res)
 }
 
 func (h *ItemsHandler) GetEnabledItems(w http.ResponseWriter, r *http.Request) {

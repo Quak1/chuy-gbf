@@ -59,6 +59,7 @@ func SetupRouter(db *sql.DB, distFS fs.FS) *chi.Mux {
 
 		r.Route("/items", func(r chi.Router) {
 			r.Get("/", itemsHandler.GetItems)
+			r.Get("/categorized", itemsHandler.GetItemsByCategory)
 			r.Get("/enabled", itemsHandler.GetEnabledItems)
 
 			r.Get("/{itemID:[0-9]+}/values", itemsHandler.GetItemValues)
