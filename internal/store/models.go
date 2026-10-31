@@ -43,6 +43,21 @@ type ItemValue struct {
 	Color  string `json:"color"`
 }
 
+type Team struct {
+	ID        int64     `json:"id"`
+	Name      string    `json:"name"`
+	Url       string    `json:"url"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type TeamSlot struct {
+	TeamID   int64  `json:"team_id"`
+	ItemID   int64  `json:"item_id"`
+	Category string `json:"category"`
+	Position int64  `json:"position"`
+}
+
 type User struct {
 	ID       int64  `json:"id"`
 	Username string `json:"username"`
