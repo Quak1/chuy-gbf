@@ -21,6 +21,12 @@ export interface Item {
   wiki_path: string;
 }
 
+export interface ItemsByCategory<T = Item> {
+  characters: Record<string, T>;
+  summons: Record<string, T>;
+  weapons: Record<string, T>;
+}
+
 export interface User {
   id: number;
   username: string;
@@ -46,4 +52,19 @@ export interface DBUpdate {
   is_ok: boolean;
   comments: string;
   created_at: Date;
+}
+
+export interface Slot extends Item {
+  position: number;
+}
+
+export type SlotItem = Item | null;
+
+export interface Team {
+  name: string;
+  url: string;
+  id: number;
+  characters: SlotItem[];
+  summons: SlotItem[];
+  weapons: SlotItem[];
 }

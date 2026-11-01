@@ -61,20 +61,24 @@ func (h *ItemsHandler) GetItemsByCategory(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	var res struct {
-		Characters []store.Item `json:"characters"`
-		Summons    []store.Item `json:"summons"`
-		Weapons    []store.Item `json:"weapons"`
+	res := struct {
+		Characters map[string]store.Item `json:"characters"`
+		Summons    map[string]store.Item `json:"summons"`
+		Weapons    map[string]store.Item `json:"weapons"`
+	}{
+		Characters: map[string]store.Item{},
+		Summons:    map[string]store.Item{},
+		Weapons:    map[string]store.Item{},
 	}
 
 	for _, item := range items {
 		switch item.Category {
 		case "character":
-			res.Characters = append(res.Characters, item)
+			res.Characters[item.ID] = item
 		case "summon":
-			res.Summons = append(res.Summons, item)
+			res.Summons[item.ID] = item
 		case "weapon":
-			res.Weapons = append(res.Weapons, item)
+			res.Weapons[item.ID] = item
 		default:
 			render.Render(w, r, ErrorServer(fmt.Errorf("Unknown category %v for item %v", item.Category, item.Name)))
 			return
