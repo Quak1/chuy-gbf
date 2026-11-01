@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import EditItemModal from "./EditItemModal.vue";
+import EditItemModal from "../components/EditItemModal.vue";
 import type { UserItem, User } from "../models";
 import { useFetch } from "../composables/useFetch";
 import { useRoute, useRouter } from "vue-router";
-import ElementSelector from "./ElementSelector.vue";
-import ItemImage from "./ItemImage.vue";
+import ElementSelector from "../components/ElementSelector.vue";
+import ItemImage from "../components/ItemImage.vue";
 import { useModal } from "../composables/useModal";
-import AddCommentModal from "./AddCommentModal.vue";
-import HoverTooltip from "./HoverTooltip.vue";
-import CommentIcon from "./icons/CommentIcon.vue";
+import AddCommentModal from "../components/AddCommentModal.vue";
+import HoverTooltip from "../components/HoverTooltip.vue";
+import CommentIcon from "../components/icons/CommentIcon.vue";
 import { useAPI } from "../composables/useAPI";
 import { useUser } from "../composables/useUser";
 

@@ -1,9 +1,9 @@
 import { createRouter, createWebHistory } from "vue-router";
-import ItemTable from "./components/ItemTable.vue";
-import NotFound from "./components/NotFound.vue";
-import Login from "./components/Login.vue";
-import UserItems from "./components/UserItems.vue";
-import AdminItems from "./components/AdminItems.vue";
+import ItemTable from "./views/ItemTable.vue";
+import NotFound from "./views/NotFound.vue";
+import Login from "./views/Login.vue";
+import UserItems from "./views/UserItems.vue";
+import AdminItems from "./views/AdminItems.vue";
 
 export const router = createRouter({
   history: createWebHistory(),

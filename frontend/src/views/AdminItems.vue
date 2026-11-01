@@ -6,8 +6,8 @@ import { useUser } from "../composables/useUser";
 import { usePost } from "../composables/usePost";
 import { useRouter } from "vue-router";
 import { useModal } from "../composables/useModal";
-import AdminItemSetupModal from "./AdminItemSetupModal.vue";
-import ItemImage from "./ItemImage.vue";
+import AdminItemSetupModal from "../components/AdminItemSetupModal.vue";
+import ItemImage from "../components/ItemImage.vue";
 
 type UpdateDBResponse = {
   message: string;
