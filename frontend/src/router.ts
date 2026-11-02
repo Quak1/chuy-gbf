@@ -13,7 +13,12 @@ export const router = createRouter({
     { path: "/:pathMatch(.*)*", name: "NotFound", component: NotFound },
     { path: "/login", name: "Login", component: Login },
     { path: "/items", name: "Items", component: AdminItems },
-    { path: "/teams/builder", name: "TeamBuilder", component: TeamBuilder },
+    {
+      path: "/teams/builder/:teamId(\\d+)?",
+      name: "TeamBuilder",
+      props: true,
+      component: TeamBuilder,
+    },
     {
       path: "/users/:userID(\\d+)/items",
       name: "UserItems",

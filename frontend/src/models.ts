@@ -58,7 +58,7 @@ export interface Slot extends Item {
   position: number;
 }
 
-export type SlotItem = Item | null;
+export type SlotItem = Slot | null;
 
 export interface Team {
   name: string;

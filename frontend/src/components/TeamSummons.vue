@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { SlotItem } from "../models";
+import { sliceTeam } from "../utils";
 
 const props = defineProps<{
   summons: SlotItem[];
@@ -11,26 +12,36 @@ const emit = defineEmits<{
   select: [position: number];
 }>();
 
-const mainSummon = computed(() => props.summons[1]);
-const summons = computed(() => props.summons.slice(2, 6));
-const subSummons = computed(() => props.summons.slice(6, 8));
+const mainSummon = computed(() => sliceTeam(props.summons, 1, 2)[0]);
+const summons = computed(() => sliceTeam(props.summons, 2, 6));
+const subSummons = computed(() => sliceTeam(props.summons, 6, 8));
 </script>
 
 <template>
   <div class="container">
     <div class="top">
-      <button>{{ mainSummon ? mainSummon.name : " - " }}</button>
+      <button @click="emit('select', mainSummon.position)">
+        {{ mainSummon.name }}
+      </button>
       <div class="cards">
-        <button v-for="(summon, i) in summons" :key="i">
-          {{ summon ? summon.name : " - " }}
+        <button
+          v-for="(summon, i) in summons"
+          :key="i"
+          @click="emit('select', summon.position)"
+        >
+          {{ summon.name }}
         </button>
       </div>
     </div>
 
     <div class="bot">
       <div class="cards">
-        <button v-for="(sub, i) in subSummons" :key="i">
-          {{ sub ? sub.name : " - " }}
+        <button
+          v-for="(sub, i) in subSummons"
+          :key="i"
+          @click="emit('select', sub.position)"
+        >
+          {{ sub.name }}
         </button>
       </div>
     </div>

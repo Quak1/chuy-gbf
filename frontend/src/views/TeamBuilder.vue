@@ -1,30 +1,46 @@
 <script setup lang="ts">
-import { watch } from "vue";
-import { useItems } from "../composables/useItems";
-import { useFetch } from "../composables/useFetch";
+import { computed, watchEffect } from "vue";
 import type { Team } from "../models";
 import TeamCharacters from "../components/TeamCharacters.vue";
 import TeamSummons from "../components/TeamSummons.vue";
 import TeamWeapons from "../components/TeamWeapons.vue";
+import { useAPI } from "../composables/useAPI";
+import { useRouter } from "vue-router";
+import { getEmptyTeam } from "../utils";
 
-const { items, error, loading } = useItems();
-const { data } = useFetch<Team>("/api/teams/1");
+const props = defineProps<{
+  teamId: String;
+}>();
 
-watch(items, () => {
-  console.log("=========================================================");
-  console.log(items.value);
-  console.log(error.value);
-  console.log(loading.value);
-  console.log("=========================================================");
-  console.log(data.value);
+const router = useRouter();
+const { call, data, error, loading, statusCode } = useAPI<Team>();
+
+const team = computed(() => {
+  return props.teamId !== undefined ? data.value : getEmptyTeam();
 });
+
+watchEffect(() => {
+  if (props.teamId !== undefined) {
+    call(`/api/teams/${props.teamId}`, {});
+  }
+});
+
+watchEffect(() => {
+  if (error.value && statusCode.value === 404) {
+    router.replace({ name: "NotFound" });
+  }
+});
+
+const handleSelect = (idx: number) => {
+  console.log({ idx });
+};
 </script>
 
 <template>
   <h1>Team Builder</h1>
-  <div v-if="data">
-    <TeamCharacters :characters="data.characters" />
-    <TeamSummons :summons="data.summons" />
-    <TeamWeapons :weapons="data.weapons" />
+  <div v-if="team">
+    <TeamCharacters :characters="team.characters" @select="handleSelect" />
+    <TeamSummons :summons="team.summons" @select="handleSelect" />
+    <TeamWeapons :weapons="team.weapons" @select="handleSelect" />
   </div>
 </template>

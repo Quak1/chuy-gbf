@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { SlotItem } from "../models";
+import { sliceTeam } from "../utils";
 
 const props = defineProps<{
   characters: SlotItem[];
@@ -11,22 +12,30 @@ const emit = defineEmits<{
   select: [position: number];
 }>();
 
-const mainCharacters = computed(() => props.characters.slice(1, 5));
-const subCharacters = computed(() => props.characters.slice(5, 7));
+const mainCharacters = computed(() => sliceTeam(props.characters, 1, 5));
+const subCharacters = computed(() => sliceTeam(props.characters, 5, 7));
 </script>
 
 <template>
   <div class="container">
     <div class="cards main">
       <span>Main</span>
-      <button v-for="(char, i) in mainCharacters" :key="i">
-        {{ char ? char.name : " - " }}
+      <button
+        v-for="(char, i) in mainCharacters"
+        :key="i"
+        @click="$emit('select', char.position)"
+      >
+        {{ char.name }}
       </button>
     </div>
     <div class="cards sub">
       <span>Sub</span>
-      <button v-for="(char, i) in subCharacters" :key="i">
-        {{ char ? char.name : " - " }}
+      <button
+        v-for="(char, i) in subCharacters"
+        :key="i"
+        @click="$emit('select', char.position)"
+      >
+        {{ char.name }}
       </button>
     </div>
   </div>

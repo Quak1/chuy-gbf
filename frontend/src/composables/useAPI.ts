@@ -4,6 +4,7 @@ export function useAPI<T>() {
   const data = ref<T | null>(null);
   const error = ref<Error | null>(null);
   const loading = ref(false);
+  const statusCode = ref<null | Number>();
 
   const call = async (url: string, options: any) => {
     data.value = null;
@@ -12,6 +13,7 @@ export function useAPI<T>() {
 
     try {
       const res = await fetch(toValue(url), options);
+      statusCode.value = res.status;
 
       if (!res.ok) {
         throw new Error(data.value?.error || res.statusText);
@@ -30,5 +32,5 @@ export function useAPI<T>() {
     return error.value ? false : true;
   };
 
-  return { call, data, error, loading };
+  return { call, data, error, loading, statusCode };
 }

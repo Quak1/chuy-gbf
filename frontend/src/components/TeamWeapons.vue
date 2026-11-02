@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { SlotItem } from "../models";
+import { sliceTeam } from "../utils";
 
 const props = defineProps<{
   weapons: SlotItem[];
@@ -11,21 +12,25 @@ const emit = defineEmits<{
   select: [position: number];
 }>();
 
-const mainWeapon = computed(() => props.weapons[1]);
-const weapons = computed(() => props.weapons.slice(2, 11));
+const mainWeapon = computed(() => sliceTeam(props.weapons, 1, 2)[0]);
+const weapons = computed(() => sliceTeam(props.weapons, 2, 11));
 </script>
 
 <template>
   <div class="container">
     <div class="main">
-      <button>
-        {{ mainWeapon ? mainWeapon.name : " - " }}
+      <button @click="emit('select', mainWeapon.position)">
+        {{ mainWeapon.name }}
       </button>
     </div>
 
     <div class="sub">
-      <button v-for="(weapon, i) in weapons" :key="i">
-        {{ weapon ? weapon : " - " }}
+      <button
+        v-for="(weapon, i) in weapons"
+        :key="i"
+        @click="emit('select', weapon.position)"
+      >
+        {{ weapon.name }}
       </button>
     </div>
   </div>
