@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watchEffect } from "vue";
+import { ref, watchEffect } from "vue";
 import type { ItemCategory, SearchItemModalData, Team } from "../models";
 import TeamCharacters from "../components/TeamCharacters.vue";
 import TeamSummons from "../components/TeamSummons.vue";
@@ -25,7 +25,7 @@ const {
   statusCode,
 } = useAPI<Team>();
 const { selectedData, openModal, closeModal } = useModal<SearchItemModalData>();
-const { post, data, loading, error } = usePost();
+const { post, error } = usePost();
 const { items } = useItems();
 
 const team = ref(getEmptyTeam());
@@ -109,16 +109,16 @@ const clearItem = async (category: ItemCategory, position: number) => {
   <div v-if="teamLoading">Loading...</div>
   <div v-else-if="team">
     <TeamCharacters
-      :characters="team.characters"
-      @select="(idx) => handleSelect(idx, 'characters')"
+      :characters="team.character"
+      @select="(idx) => handleSelect(idx, 'character')"
     />
     <TeamSummons
-      :summons="team.summons"
-      @select="(idx) => handleSelect(idx, 'summons')"
+      :summons="team.summon"
+      @select="(idx) => handleSelect(idx, 'summon')"
     />
     <TeamWeapons
-      :weapons="team.weapons"
-      @select="(idx) => handleSelect(idx, 'weapons')"
+      :weapons="team.weapon"
+      @select="(idx) => handleSelect(idx, 'weapon')"
     />
   </div>
 

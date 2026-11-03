@@ -68,9 +68,9 @@ func (h *TeamsHandler) GetTeam(w http.ResponseWriter, r *http.Request) {
 		Name       string            `json:"name"`
 		URL        string            `json:"url"`
 		ID         int64             `json:"id"`
-		Characters [6 + 1]*SlotItem  `json:"characters"`
-		Summons    [7 + 1]*SlotItem  `json:"summons"`
-		Weapons    [10 + 1]*SlotItem `json:"weapons"`
+		Characters [6 + 1]*SlotItem  `json:"character"`
+		Summons    [7 + 1]*SlotItem  `json:"summon"`
+		Weapons    [10 + 1]*SlotItem `json:"weapon"`
 	}{
 		ID:   dbTeam.ID,
 		Name: dbTeam.Name,

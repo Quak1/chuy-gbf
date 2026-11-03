@@ -10,7 +10,7 @@ export interface UserItemValues {
   values: Record<string, ItemValue>;
 }
 
-export type ItemCategory = "characters" | "summons" | "weapons";
+export type ItemCategory = "character" | "summon" | "weapon";
 
 export interface Item {
   id: string;
@@ -24,9 +24,9 @@ export interface Item {
 }
 
 export interface ItemsByCategory<T = Item> {
-  characters: Record<string, T>;
-  summons: Record<string, T>;
-  weapons: Record<string, T>;
+  character: Record<string, T>;
+  summon: Record<string, T>;
+  weapon: Record<string, T>;
 }
 
 export interface User {
@@ -66,9 +66,9 @@ export interface Team {
   name: string;
   url: string;
   id: number;
-  characters: SlotItem[];
-  summons: SlotItem[];
-  weapons: SlotItem[];
+  character: SlotItem[];
+  summon: SlotItem[];
+  weapon: SlotItem[];
 }
 
 export interface SearchItemModalData {

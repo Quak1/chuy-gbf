@@ -62,9 +62,9 @@ func (h *ItemsHandler) GetItemsByCategory(w http.ResponseWriter, r *http.Request
 	}
 
 	res := struct {
-		Characters map[string]store.Item `json:"characters"`
-		Summons    map[string]store.Item `json:"summons"`
-		Weapons    map[string]store.Item `json:"weapons"`
+		Characters map[string]store.Item `json:"character"`
+		Summons    map[string]store.Item `json:"summon"`
+		Weapons    map[string]store.Item `json:"weapon"`
 	}{
 		Characters: map[string]store.Item{},
 		Summons:    map[string]store.Item{},
