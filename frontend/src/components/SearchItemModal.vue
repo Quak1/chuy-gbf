@@ -4,6 +4,7 @@ import type { SearchItemModalData } from "../models";
 import Modal from "./Modal.vue";
 import { useItems } from "../composables/useItems";
 import ItemImage from "./ItemImage.vue";
+import ElementSelector from "./ElementSelector.vue";
 
 const props = defineProps<{
   data: SearchItemModalData;
@@ -18,6 +19,7 @@ const { items } = useItems();
 const page = ref(0);
 const search = ref("");
 const itemsPerPage = ref(7);
+const elementFilter = ref("");
 
 const filtered = computed(() => {
   if (!items.value) {
@@ -26,6 +28,7 @@ const filtered = computed(() => {
 
   const entries = items.value[props.data.category];
   return Object.keys(entries)
+    .filter((key) => entries[key].element === elementFilter.value)
     .filter((key) => entries[key].name.includes(search.value))
     .map((key) => entries[key]);
 });
@@ -36,7 +39,6 @@ const totalPages = computed(() =>
   Math.ceil(filtered.value.length / itemsPerPage.value),
 );
 
-console.log(totalPages.value);
 const pages = computed(() => {
   const sidePages = 3;
   const maxLength = sidePages * 2 + 1;
@@ -59,6 +61,16 @@ const paginated = computed(() => {
   const start = page.value * itemsPerPage.value;
   return filtered.value.slice(start, start + itemsPerPage.value);
 });
+
+const itemList = computed(() => {
+  if (!items.value) return [];
+  return Object.values(items.value[props.data.category]);
+});
+
+const handleElementFilter = (element: string) => {
+  elementFilter.value = element;
+  page.value = 0;
+};
 </script>
 
 <template>
@@ -67,6 +79,12 @@ const paginated = computed(() => {
       <h3>Edit {{ data.category.slice(0, -1) }}</h3>
       <input type="text" v-model="search" />
       <button @click="emit('set', 'clear')">Remove item</button>
+
+      <ElementSelector
+        v-if="itemList.length"
+        :items="itemList"
+        @update="handleElementFilter"
+      />
 
       <div class="item-container">
         <div
