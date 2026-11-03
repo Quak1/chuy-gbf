@@ -66,7 +66,7 @@ func (q *Queries) GetTeam(ctx context.Context, id int64) (Team, error) {
 const getTeamSlots = `-- name: GetTeamSlots :many
 SELECT
   ts.position,
-  i.id, i.name, i.element, i.type, i.series, i.enabled, i.category, i.wiki_path
+  i.id, i.name, i.element, i.type, i.series, i.enabled, i.category, i.wiki_path, i.image_name
 FROM teams t
 JOIN team_slots ts ON t.id = ts.team_id
 JOIN items i ON ts.item_id = i.id
@@ -77,15 +77,16 @@ ORDER BY
 `
 
 type GetTeamSlotsRow struct {
-	Position int64  `json:"position"`
-	ID       string `json:"id"`
-	Name     string `json:"name"`
-	Element  string `json:"element"`
-	Type     string `json:"type"`
-	Series   string `json:"series"`
-	Enabled  bool   `json:"enabled"`
-	Category string `json:"category"`
-	WikiPath string `json:"wiki_path"`
+	Position  int64  `json:"position"`
+	ID        string `json:"id"`
+	Name      string `json:"name"`
+	Element   string `json:"element"`
+	Type      string `json:"type"`
+	Series    string `json:"series"`
+	Enabled   bool   `json:"enabled"`
+	Category  string `json:"category"`
+	WikiPath  string `json:"wiki_path"`
+	ImageName string `json:"image_name"`
 }
 
 func (q *Queries) GetTeamSlots(ctx context.Context, id int64) ([]GetTeamSlotsRow, error) {
@@ -107,6 +108,7 @@ func (q *Queries) GetTeamSlots(ctx context.Context, id int64) ([]GetTeamSlotsRow
 			&i.Enabled,
 			&i.Category,
 			&i.WikiPath,
+			&i.ImageName,
 		); err != nil {
 			return nil, err
 		}

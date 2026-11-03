@@ -24,10 +24,11 @@ type Changelog struct {
 }
 
 type Data struct {
-	Lookup     map[string]string `json:"lookup"`
-	Weapons    map[string]any    `json:"weapons"`
-	Summons    map[string]any    `json:"summons"`
-	Characters map[string]any    `json:"characters"`
+	Lookup     map[string]string     `json:"lookup"`
+	Weapons    map[string][][]string `json:"weapons"`
+	Summons    map[string][][]string `json:"summons"`
+	Characters map[string][][]string `json:"characters"`
+	Jobs       map[string][][]string `json:"job"`
 }
 
 func downloadFile(url string, filepath string) error {

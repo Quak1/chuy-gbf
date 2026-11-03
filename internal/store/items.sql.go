@@ -10,21 +10,23 @@ import (
 )
 
 const createItem = `-- name: CreateItem :exec
-INSERT INTO items (id, name, element, type, series, enabled, category, wiki_path)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO items (id, name, element, type, series, enabled, category, wiki_path, image_name)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 ON CONFLICT(id) DO UPDATE SET
-  wiki_path=excluded.wiki_path
+  wiki_path=excluded.wiki_path,
+  image_name=excluded.image_name
 `
 
 type CreateItemParams struct {
-	ID       string `json:"id"`
-	Name     string `json:"name"`
-	Element  string `json:"element"`
-	Type     string `json:"type"`
-	Series   string `json:"series"`
-	Enabled  bool   `json:"enabled"`
-	Category string `json:"category"`
-	WikiPath string `json:"wiki_path"`
+	ID        string `json:"id"`
+	Name      string `json:"name"`
+	Element   string `json:"element"`
+	Type      string `json:"type"`
+	Series    string `json:"series"`
+	Enabled   bool   `json:"enabled"`
+	Category  string `json:"category"`
+	WikiPath  string `json:"wiki_path"`
+	ImageName string `json:"image_name"`
 }
 
 func (q *Queries) CreateItem(ctx context.Context, arg CreateItemParams) error {
@@ -37,6 +39,7 @@ func (q *Queries) CreateItem(ctx context.Context, arg CreateItemParams) error {
 		arg.Enabled,
 		arg.Category,
 		arg.WikiPath,
+		arg.ImageName,
 	)
 	return err
 }
@@ -102,7 +105,7 @@ func (q *Queries) EnableItem(ctx context.Context, id string) error {
 }
 
 const getAllItems = `-- name: GetAllItems :many
-SELECT id, name, element, type, series, enabled, category, wiki_path FROM items
+SELECT id, name, element, type, series, enabled, category, wiki_path, image_name FROM items
 `
 
 func (q *Queries) GetAllItems(ctx context.Context) ([]Item, error) {
@@ -123,6 +126,7 @@ func (q *Queries) GetAllItems(ctx context.Context) ([]Item, error) {
 			&i.Enabled,
 			&i.Category,
 			&i.WikiPath,
+			&i.ImageName,
 		); err != nil {
 			return nil, err
 		}
@@ -180,7 +184,7 @@ func (q *Queries) GetAllSelectedItemValues(ctx context.Context) ([]GetAllSelecte
 }
 
 const getEnabledItems = `-- name: GetEnabledItems :many
-SELECT id, name, element, type, series, enabled, category, wiki_path FROM items
+SELECT id, name, element, type, series, enabled, category, wiki_path, image_name FROM items
 WHERE enabled = 1
 `
 
@@ -202,6 +206,7 @@ func (q *Queries) GetEnabledItems(ctx context.Context) ([]Item, error) {
 			&i.Enabled,
 			&i.Category,
 			&i.WikiPath,
+			&i.ImageName,
 		); err != nil {
 			return nil, err
 		}

@@ -17,14 +17,15 @@ type DbDataUpdate struct {
 }
 
 type Item struct {
-	ID       string `json:"id"`
-	Name     string `json:"name"`
-	Element  string `json:"element"`
-	Type     string `json:"type"`
-	Series   string `json:"series"`
-	Enabled  bool   `json:"enabled"`
-	Category string `json:"category"`
-	WikiPath string `json:"wiki_path"`
+	ID        string `json:"id"`
+	Name      string `json:"name"`
+	Element   string `json:"element"`
+	Type      string `json:"type"`
+	Series    string `json:"series"`
+	Enabled   bool   `json:"enabled"`
+	Category  string `json:"category"`
+	WikiPath  string `json:"wiki_path"`
+	ImageName string `json:"image_name"`
 }
 
 type ItemAuditLog struct {

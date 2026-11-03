@@ -21,6 +21,7 @@ export interface Item {
   enabled: boolean;
   category: ItemCategory;
   wiki_path: string;
+  image_name: string;
 }
 
 export interface ItemsByCategory<T = Item> {

@@ -23,7 +23,7 @@ func LoadData(download bool, q *store.Queries) (error, []string) {
 
 	var errorMsg []string
 	for _, item := range items {
-		if item.Rarity != "ssr" || item.Element == "" {
+		if item.Rarity != "ssr" || item.Element == "" || item.Name == "" {
 			continue
 		}
 

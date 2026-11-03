@@ -5,17 +5,27 @@ const baseURL =
 const lowBaseURl =
   "https://prd-game-a-granbluefantasy.akamaized.net/assets_en/img_low/sp/assets";
 
-export function getItemImageURL(item: Item, useHighRes = false): string {
-  let url = useHighRes ? baseURL : lowBaseURl;
+interface Config {
+  item: Item;
+  highRes: boolean;
+  portrait: boolean;
+}
+export function getItemImageURL({ item, highRes, portrait }: Config): string {
+  let url = highRes ? baseURL : lowBaseURl;
 
   switch (item.category) {
     case "character":
-      if (item.type === "") return `${url}/leader/m/${item.id}_01.jpg`;
-      return `${url}/npc/m/${item.id}_01.jpg`;
+      if (item.element === "any" && item.type === "") {
+        // is Main Character
+        return portrait
+          ? `${baseURL}/leader/raid_normal/${item.image_name}.jpg`
+          : `${url}/leader/m/${item.id}_01.jpg`;
+      }
+      return `${url}/npc/${portrait ? "f" : "m"}/${item.image_name}.jpg`;
     case "summon":
-      return `${url}/summon/m/${item.id}.jpg`;
+      return `${url}/summon/${portrait ? "party_main" : "m"}/${item.image_name}.jpg`;
     case "weapon":
-      return `${url}/weapon/m/${item.id}.jpg`;
+      return `${url}/weapon/${portrait ? "ls" : "m"}/${item.image_name}.jpg`;
     default:
       console.error("item has no category", item);
   }
@@ -28,9 +38,9 @@ export function getEmptyTeam(): Team {
     id: 0,
     name: "",
     url: "",
-    characters: new Array(7).fill(null),
-    summons: new Array(8).fill(null),
-    weapons: new Array(11).fill(null),
+    character: new Array(7).fill(null),
+    summon: new Array(8).fill(null),
+    weapon: new Array(11).fill(null),
   };
 }
 

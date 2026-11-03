@@ -65,34 +65,20 @@ func (h *TeamsHandler) GetTeam(w http.ResponseWriter, r *http.Request) {
 	}
 
 	team := struct {
-		Name       string            `json:"name"`
-		URL        string            `json:"url"`
-		ID         int64             `json:"id"`
-		Characters [6 + 1]*SlotItem  `json:"character"`
-		Summons    [7 + 1]*SlotItem  `json:"summon"`
-		Weapons    [10 + 1]*SlotItem `json:"weapon"`
+		Name       string                         `json:"name"`
+		URL        string                         `json:"url"`
+		ID         int64                          `json:"id"`
+		Characters [6 + 1]*store.GetTeamSlotsRow  `json:"character"`
+		Summons    [7 + 1]*store.GetTeamSlotsRow  `json:"summon"`
+		Weapons    [10 + 1]*store.GetTeamSlotsRow `json:"weapon"`
 	}{
 		ID:   dbTeam.ID,
 		Name: dbTeam.Name,
 		URL:  dbTeam.Url,
 	}
 
-	for _, i := range teamSlots {
-		item := SlotItem{
-			Item: store.Item{
-				ID:       i.ID,
-				Name:     i.Name,
-				Element:  i.Element,
-				Type:     i.Type,
-				Series:   i.Series,
-				Enabled:  i.Enabled,
-				Category: i.Category,
-				WikiPath: i.WikiPath,
-			},
-			Position: i.Position,
-		}
-
-		switch i.Category {
+	for _, item := range teamSlots {
+		switch item.Category {
 		case "character":
 			team.Characters[item.Position] = &item
 		case "summon":

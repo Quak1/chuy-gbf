@@ -6,10 +6,11 @@ import { getItemImageURL } from "../utils";
 const props = defineProps<{
   item: Item;
   highRes?: boolean;
+  portrait?: boolean;
   lazyLoading?: boolean;
 }>();
 
-const src = computed(() => getItemImageURL(props.item, props.highRes));
+const src = computed(() => getItemImageURL(props));
 </script>
 
 <template>

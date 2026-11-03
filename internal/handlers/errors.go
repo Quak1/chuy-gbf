@@ -3,6 +3,7 @@ package handlers
 import (
 	"database/sql"
 	"errors"
+	"log"
 	"net/http"
 
 	"github.com/go-chi/render"
@@ -65,6 +66,7 @@ var ErrorForbidden = &ErrResponse{
 }
 
 func HandleDatabaseError(w http.ResponseWriter, r *http.Request, err error) {
+	log.Println(r.URL, err)
 	if errors.Is(err, sql.ErrNoRows) {
 		render.Render(w, r, ErrorNotFound)
 		return

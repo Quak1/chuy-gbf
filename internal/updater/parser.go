@@ -1,6 +1,7 @@
 package updater
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/Quak1/chuy-gbf/internal/store"
@@ -11,7 +12,7 @@ type DataItem struct {
 	Rarity string
 }
 
-type CategoryLists map[string]map[string]any
+type CategoryLists map[string]map[string][][]string
 
 func parseLookup(id, input string, lists *CategoryLists) DataItem {
 	item := DataItem{
@@ -44,16 +45,36 @@ func parseLookup(id, input string, lists *CategoryLists) DataItem {
 			item.Series = value
 		case 'w':
 			item.WikiPath = value
-		case 'm':
-			item.Element = "any"
-			item.Rarity = "ssr"
-			item.Category = "character"
 		}
 	}
 
+	var img string
 	for k, v := range *lists {
-		if _, ok := v[item.ID]; ok {
+		if i, ok := v[item.ID]; ok {
 			item.Category, _ = strings.CutSuffix(k, "s")
+
+			switch k {
+			case "jobs":
+				item.Element = "any"
+				item.Rarity = "ssr"
+				item.Category = "character"
+				img = last(i[2])
+			case "weapons":
+				img = last(i[0])
+			case "summons":
+				img = last(i[0])
+			case "characters":
+				img = last(i[5])
+			}
+
+			if img == "" {
+				img = item.ID
+				if k == "character" {
+					img = fmt.Sprintf("%s_01", item.ID)
+				}
+			}
+			item.ImageName = img
+
 			break
 		}
 	}
@@ -61,9 +82,17 @@ func parseLookup(id, input string, lists *CategoryLists) DataItem {
 	return item
 }
 
+func last(a []string) string {
+	if len(a) == 0 {
+		return ""
+	}
+	return a[len(a)-1]
+}
+
 func parseData(data *Data) []DataItem {
 	items := []DataItem{}
 	lists := &CategoryLists{
+		"jobs":       data.Jobs,
 		"weapons":    data.Weapons,
 		"summons":    data.Summons,
 		"characters": data.Characters,
