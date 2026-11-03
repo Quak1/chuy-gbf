@@ -14,7 +14,7 @@ export const router = createRouter({
     { path: "/login", name: "Login", component: Login },
     { path: "/items", name: "Items", component: AdminItems },
     {
-      path: "/teams/builder/:teamId(\\d+)?",
+      path: "/teams/builder/:teamId(\\d+)",
       name: "TeamBuilder",
       props: true,
       component: TeamBuilder,

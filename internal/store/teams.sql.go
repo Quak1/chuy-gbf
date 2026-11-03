@@ -46,7 +46,7 @@ func (q *Queries) DeleteTeam(ctx context.Context, id int64) error {
 }
 
 const getTeam = `-- name: GetTeam :one
-SELECT id, name, url, created_at, updated_at FROM teams 
+SELECT id, name, url, created_at, updated_at FROM teams
 WHERE teams.id = ?
 `
 

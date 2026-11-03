@@ -64,8 +64,9 @@ const paginated = computed(() => {
 <template>
   <Modal @close="emit('close')">
     <div class="container">
-      <h3>Search {{ data.category }}</h3>
+      <h3>Edit {{ data.category.slice(0, -1) }}</h3>
       <input type="text" v-model="search" />
+      <button @click="emit('set', 'clear')">Remove item</button>
 
       <div class="item-container">
         <div

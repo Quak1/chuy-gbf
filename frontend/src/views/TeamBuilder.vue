@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watchEffect } from "vue";
+import { computed, ref, watchEffect } from "vue";
 import type { ItemCategory, SearchItemModalData, Team } from "../models";
 import TeamCharacters from "../components/TeamCharacters.vue";
 import TeamSummons from "../components/TeamSummons.vue";
@@ -9,27 +9,36 @@ import { useRouter } from "vue-router";
 import { getEmptyTeam } from "../utils";
 import { useModal } from "../composables/useModal";
 import SearchItemModal from "../components/SearchItemModal.vue";
+import { usePost } from "../composables/usePost";
+import { useItems } from "../composables/useItems";
 
 const props = defineProps<{
-  teamId?: String;
+  teamId: String;
 }>();
 
 const router = useRouter();
-const { call, data, error, loading, statusCode } = useAPI<Team>();
+const {
+  call,
+  data: teamData,
+  error: teamError,
+  loading: teamLoading,
+  statusCode,
+} = useAPI<Team>();
 const { selectedData, openModal, closeModal } = useModal<SearchItemModalData>();
+const { post, data, loading, error } = usePost();
+const { items } = useItems();
 
-const team = computed(() => {
-  return props.teamId !== undefined ? data.value : getEmptyTeam();
-});
+const team = ref(getEmptyTeam());
 
-watchEffect(() => {
-  if (props.teamId !== undefined) {
-    call(`/api/teams/${props.teamId}`, {});
+watchEffect(async () => {
+  await call(`/api/teams/${props.teamId}`, {});
+  if (teamData.value) {
+    team.value = teamData.value;
   }
 });
 
 watchEffect(() => {
-  if (error.value && statusCode.value === 404) {
+  if (teamError.value && statusCode.value === 404) {
     router.replace({ name: "NotFound" });
   }
 });
@@ -37,20 +46,67 @@ watchEffect(() => {
 const handleSelect = (idx: number, category: ItemCategory) => {
   openModal({ idx, category });
 };
-const handleSetItem = (itemId: string) => {
-  console.log({
-    idx: selectedData.value?.idx,
-    category: selectedData.value?.category,
-    itemId,
-  });
+
+const handleSetItem = async (itemId: string) => {
+  if (selectedData.value === null) return;
+
+  const category = selectedData.value.category;
+  const position = selectedData.value.idx;
+
+  if (itemId === "clear") {
+    clearItem(category, position);
+  } else {
+    setItem(itemId, category, position);
+  }
 
   closeModal();
+};
+
+const setItem = async (
+  itemId: string,
+  category: ItemCategory,
+  position: number,
+) => {
+  const ok = await post(`/api/teams/${props.teamId}/slot`, {
+    category: category.slice(0, -1),
+    position: position,
+    item_id: itemId,
+  });
+
+  if (!ok) {
+    console.log(selectedData.value);
+    console.log(error.value);
+    alert(`error`);
+  } else if (items.value) {
+    const newItem = {
+      ...items.value[category][itemId],
+      position: position,
+    };
+
+    team.value[category][position] = newItem;
+  }
+};
+
+const clearItem = async (category: ItemCategory, position: number) => {
+  const ok = await post(`/api/teams/${props.teamId}/slot/clear`, {
+    category: category.slice(0, -1),
+    position,
+  });
+
+  if (!ok) {
+    console.log(selectedData.value);
+    console.log(error.value);
+    alert(`error`);
+    return;
+  }
+
+  team.value[category][position] = null;
 };
 </script>
 
 <template>
   <h1>Team Builder</h1>
-  <div v-if="loading">Loading...</div>
+  <div v-if="teamLoading">Loading...</div>
   <div v-else-if="team">
     <TeamCharacters
       :characters="team.characters"
