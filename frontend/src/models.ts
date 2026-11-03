@@ -10,6 +10,8 @@ export interface UserItemValues {
   values: Record<string, ItemValue>;
 }
 
+export type ItemCategory = "characters" | "summons" | "weapons";
+
 export interface Item {
   id: string;
   name: string;
@@ -17,7 +19,7 @@ export interface Item {
   type: string;
   series: string;
   enabled: boolean;
-  category: string;
+  category: ItemCategory;
   wiki_path: string;
 }
 
@@ -67,4 +69,9 @@ export interface Team {
   characters: SlotItem[];
   summons: SlotItem[];
   weapons: SlotItem[];
+}
+
+export interface SearchItemModalData {
+  category: ItemCategory;
+  idx: number;
 }
