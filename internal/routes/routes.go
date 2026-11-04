@@ -94,7 +94,7 @@ func SetupRouter(db *sql.DB, distFS fs.FS) *chi.Mux {
 				r.Use(middleware.URLIntID("teamID", handlers.TeamIDKey))
 
 				r.Get("/", teamsHandler.GetTeam)
-				r.Put("/", teamsHandler.UpdateTeam)
+				r.Post("/", teamsHandler.UpdateTeam)
 				r.Delete("/", teamsHandler.DeleteTeam)
 				r.Post("/slot", teamsHandler.SetTeamSlot)
 				r.Post("/slot/clear", teamsHandler.ClearTeamSlot)

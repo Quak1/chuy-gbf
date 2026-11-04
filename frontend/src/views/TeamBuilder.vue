@@ -11,6 +11,7 @@ import { useModal } from "../composables/useModal";
 import SearchItemModal from "../components/SearchItemModal.vue";
 import { usePost } from "../composables/usePost";
 import { useItems } from "../composables/useItems";
+import EditTeamModal from "../components/EditTeamModal.vue";
 
 const props = defineProps<{
   teamId: String;
@@ -25,6 +26,11 @@ const {
   statusCode,
 } = useAPI<Team>();
 const { selectedData, openModal, closeModal } = useModal<SearchItemModalData>();
+const {
+  selectedData: editTeamOpen,
+  openModal: openEditTeam,
+  closeModal: closeEditTeam,
+} = useModal<Team>();
 const { post, error } = usePost();
 const { items } = useItems();
 
@@ -102,11 +108,26 @@ const clearItem = async (category: ItemCategory, position: number) => {
 
   team.value[category][position] = null;
 };
+
+const handleUpdateTeam = async (name: string, url: string) => {
+  team.value.name = name;
+  team.value.url = url;
+  closeModal();
+};
 </script>
 
 <template>
-  <h1>{{ team.name }}</h1>
-  <a v-if="team.url" :href="team.url">{{ team.url }}</a>
+  <div class="header">
+    <div class="title">
+      <h1>{{ team.name }}</h1>
+      <button @click="openEditTeam(team)">Edit</button>
+    </div>
+
+    <div>
+      <span> Source: </span>
+      <a v-if="team.url" :href="team.url">{{ team.url }}</a>
+    </div>
+  </div>
 
   <div v-if="teamLoading">Loading...</div>
 
@@ -131,4 +152,26 @@ const clearItem = async (category: ItemCategory, position: number) => {
     @close="closeModal"
     @set="handleSetItem"
   />
+  <EditTeamModal
+    v-if="editTeamOpen"
+    :data="team"
+    @close="closeEditTeam"
+    @update="handleUpdateTeam"
+  />
 </template>
+
+<style scoped>
+.header {
+  margin-bottom: 15px;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  h1 {
+    margin: 0;
+  }
+}
+</style>

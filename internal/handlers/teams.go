@@ -92,13 +92,7 @@ func (h *TeamsHandler) GetTeam(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *TeamsHandler) CreateTeam(w http.ResponseWriter, r *http.Request) {
-	var data TeamRequest
-	if err := render.Bind(r, &data); err != nil {
-		render.Render(w, r, ErrorInvalidRequest(err))
-		return
-	}
-
-	teamId, err := h.query.CreateTeam(r.Context(), data.Name)
+	teamId, err := h.query.CreateTeam(r.Context(), "New Team")
 	if err != nil {
 		render.Render(w, r, ErrorServer(err))
 		return
