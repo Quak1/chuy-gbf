@@ -68,7 +68,7 @@ const setItem = async (
   position: number,
 ) => {
   const ok = await post(`/api/teams/${props.teamId}/slot`, {
-    category: category.slice(0, -1),
+    category: category,
     position: position,
     item_id: itemId,
   });
@@ -89,7 +89,7 @@ const setItem = async (
 
 const clearItem = async (category: ItemCategory, position: number) => {
   const ok = await post(`/api/teams/${props.teamId}/slot/clear`, {
-    category: category.slice(0, -1),
+    category: category,
     position,
   });
 
@@ -105,8 +105,11 @@ const clearItem = async (category: ItemCategory, position: number) => {
 </script>
 
 <template>
-  <h1>Team Builder</h1>
+  <h1>{{ team.name }}</h1>
+  <a v-if="team.url" :href="team.url">{{ team.url }}</a>
+
   <div v-if="teamLoading">Loading...</div>
+
   <div v-else-if="team">
     <TeamCharacters
       :characters="team.character"

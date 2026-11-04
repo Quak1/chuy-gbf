@@ -8,6 +8,8 @@ const props = defineProps<{
   highRes?: boolean;
   portrait?: boolean;
   lazyLoading?: boolean;
+  disabled?: boolean;
+  party?: boolean;
 }>();
 
 const src = computed(() => getItemImageURL(props));
@@ -18,6 +20,7 @@ const src = computed(() => getItemImageURL(props));
     :href="`https://gbf.wiki/${item.wiki_path}`"
     target="_blank"
     rel="noopener noreferrer"
+    :class="{ disabled }"
   >
     <img
       :src
@@ -29,6 +32,9 @@ const src = computed(() => getItemImageURL(props));
 </template>
 
 <style scoped>
+.disabled {
+  pointer-events: none;
+}
 img {
   width: 100%;
   height: auto;

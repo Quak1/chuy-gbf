@@ -2,6 +2,8 @@
 import { computed } from "vue";
 import type { SlotItem } from "../models";
 import { sliceTeam } from "../utils";
+import ItemImage from "./ItemImage.vue";
+import EmptyItemImage from "./EmptyItemImage.vue";
 
 const props = defineProps<{
   summons: SlotItem[];
@@ -21,15 +23,24 @@ const subSummons = computed(() => sliceTeam(props.summons, 6, 8));
   <div class="container">
     <div class="top">
       <button @click="emit('select', mainSummon.position)">
-        {{ mainSummon.name }}
+        <ItemImage
+          v-if="'type' in mainSummon"
+          :item="mainSummon"
+          highRes
+          portrait
+          disabled
+        />
+        <EmptyItemImage v-else category="summon" portrait />
       </button>
+
       <div class="cards">
         <button
           v-for="(summon, i) in summons"
           :key="i"
           @click="emit('select', summon.position)"
         >
-          {{ summon.name }}
+          <ItemImage v-if="'type' in summon" :item="summon" party />
+          <EmptyItemImage v-else category="summon" />
         </button>
       </div>
     </div>
@@ -37,11 +48,12 @@ const subSummons = computed(() => sliceTeam(props.summons, 6, 8));
     <div class="bot">
       <div class="cards">
         <button
-          v-for="(sub, i) in subSummons"
+          v-for="(summon, i) in subSummons"
           :key="i"
-          @click="emit('select', sub.position)"
+          @click="emit('select', summon.position)"
         >
-          {{ sub.name }}
+          <ItemImage v-if="'type' in summon" :item="summon" party />
+          <EmptyItemImage v-else category="summon" />
         </button>
       </div>
     </div>
@@ -59,7 +71,9 @@ const subSummons = computed(() => sliceTeam(props.summons, 6, 8));
 
 button {
   width: 130px;
-  height: 100px;
+  padding: 0;
+  background: none;
+  border: none;
 }
 
 .top,
@@ -75,7 +89,7 @@ button {
 
   > button {
     width: 140px;
-    height: 240px;
+    min-height: 220px;
   }
 }
 

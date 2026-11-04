@@ -2,6 +2,8 @@
 import { computed } from "vue";
 import type { SlotItem } from "../models";
 import { sliceTeam } from "../utils";
+import ItemImage from "./ItemImage.vue";
+import EmptyItemImage from "./EmptyItemImage.vue";
 
 const props = defineProps<{
   weapons: SlotItem[];
@@ -20,7 +22,14 @@ const weapons = computed(() => sliceTeam(props.weapons, 2, 11));
   <div class="container">
     <div class="main">
       <button @click="emit('select', mainWeapon.position)">
-        {{ mainWeapon.name }}
+        <ItemImage
+          v-if="'type' in mainWeapon"
+          :item="mainWeapon"
+          portrait
+          highRes
+          disabled
+        />
+        <EmptyItemImage v-else category="weapon" portrait />
       </button>
     </div>
 
@@ -30,7 +39,8 @@ const weapons = computed(() => sliceTeam(props.weapons, 2, 11));
         :key="i"
         @click="emit('select', weapon.position)"
       >
-        {{ weapon.name }}
+        <ItemImage v-if="'type' in weapon" :item="weapon" disabled />
+        <EmptyItemImage v-else category="weapon" />
       </button>
     </div>
   </div>
@@ -52,7 +62,8 @@ const weapons = computed(() => sliceTeam(props.weapons, 2, 11));
 
 button {
   width: 110px;
-  height: 105px;
+  padding: 0;
+  border: none;
 }
 
 .main button {

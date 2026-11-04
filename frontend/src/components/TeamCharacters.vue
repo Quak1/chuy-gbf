@@ -2,6 +2,8 @@
 import { computed } from "vue";
 import type { SlotItem } from "../models";
 import { sliceTeam } from "../utils";
+import ItemImage from "./ItemImage.vue";
+import EmptyItemImage from "./EmptyItemImage.vue";
 
 const props = defineProps<{
   characters: SlotItem[];
@@ -12,30 +14,27 @@ const emit = defineEmits<{
   select: [position: number];
 }>();
 
-const mainCharacters = computed(() => sliceTeam(props.characters, 1, 5));
-const subCharacters = computed(() => sliceTeam(props.characters, 5, 7));
+const sections = computed(() => [
+  { name: "Main", characters: sliceTeam(props.characters, 1, 5) },
+  { name: "Sub", characters: sliceTeam(props.characters, 5, 7) },
+]);
 </script>
 
 <template>
   <div class="container">
-    <div class="cards main">
-      <span>Main</span>
+    <div
+      v-for="section in sections"
+      class="cards"
+      :class="section.name.toLowerCase()"
+    >
+      <span>{{ section.name }}</span>
       <button
-        v-for="(char, i) in mainCharacters"
+        v-for="(char, i) in section.characters"
         :key="i"
         @click="$emit('select', char.position)"
       >
-        {{ char.name }}
-      </button>
-    </div>
-    <div class="cards sub">
-      <span>Sub</span>
-      <button
-        v-for="(char, i) in subCharacters"
-        :key="i"
-        @click="$emit('select', char.position)"
-      >
-        {{ char.name }}
+        <ItemImage v-if="'type' in char" :item="char" portrait disabled />
+        <EmptyItemImage v-else category="character" portrait />
       </button>
     </div>
   </div>
@@ -45,6 +44,8 @@ const subCharacters = computed(() => sliceTeam(props.characters, 5, 7));
 button {
   width: 72px;
   height: 150px;
+  padding: 0;
+  border: none;
 }
 
 .container {

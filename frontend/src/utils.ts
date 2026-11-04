@@ -9,8 +9,14 @@ interface Config {
   item: Item;
   highRes: boolean;
   portrait: boolean;
+  party: boolean;
 }
-export function getItemImageURL({ item, highRes, portrait }: Config): string {
+export function getItemImageURL({
+  item,
+  highRes,
+  portrait,
+  party,
+}: Config): string {
   let url = highRes ? baseURL : lowBaseURl;
 
   switch (item.category) {
@@ -23,11 +29,30 @@ export function getItemImageURL({ item, highRes, portrait }: Config): string {
       }
       return `${url}/npc/${portrait ? "f" : "m"}/${item.image_name}.jpg`;
     case "summon":
-      return `${url}/summon/${portrait ? "party_main" : "m"}/${item.image_name}.jpg`;
+      return `${url}/summon/${portrait ? "party_main" : party ? "party_sub" : "m"}/${item.image_name}.jpg`;
     case "weapon":
       return `${url}/weapon/${portrait ? "ls" : "m"}/${item.image_name}.jpg`;
     default:
       console.error("item has no category", item);
+  }
+
+  return "";
+}
+
+interface EmptyConfig {
+  category: string;
+  portrait: boolean;
+}
+export function getEmptyImagePath({ category, portrait }: EmptyConfig): string {
+  switch (category) {
+    case "character":
+      return `/img/empty_character${portrait ? "_portrait" : ""}.jpg`;
+    case "summon":
+      return `/img/empty_summon${portrait ? "_portrait.png" : ".jpg"}`;
+    case "weapon":
+      return `/img/empty_weapon${portrait ? "_portrait.jpg" : ".png"}`;
+    default:
+      console.error("unknown category:", category);
   }
 
   return "";
