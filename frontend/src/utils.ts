@@ -21,19 +21,30 @@ export function getItemImageURL({
 }: Config): string {
   let url = highRes ? baseURL : lowBaseURl;
 
+  let shape = "m";
+  if (square) shape = "s";
+
   switch (item.category) {
     case "character":
+      // is Main Character
       if (item.element === "any" && item.type === "") {
-        // is Main Character
         return portrait
           ? `${baseURL}/leader/raid_normal/${item.image_name}.jpg`
           : `${url}/leader/m/${item.id}_01.jpg`;
       }
-      return `${url}/npc/${portrait ? "f" : square ? "s" : "m"}/${item.image_name}.jpg`;
+
+      if (portrait) shape = "f";
+      return `${url}/npc/${shape}/${item.image_name}.jpg`;
+
     case "summon":
-      return `${url}/summon/${portrait ? "party_main" : party ? "party_sub" : square ? "s" : "m"}/${item.image_name}.jpg`;
+      if (portrait) shape = "party_main";
+      else if (party) shape = "party_sub";
+      return `${url}/summon/${shape}/${item.image_name}.jpg`;
+
     case "weapon":
-      return `${url}/weapon/${portrait ? "ls" : square ? "s" : "m"}/${item.image_name}.jpg`;
+      if (portrait) shape = "ls";
+      return `${url}/weapon/${shape}/${item.image_name}.jpg`;
+
     default:
       console.error("item has no category", item);
   }
