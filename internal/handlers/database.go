@@ -63,11 +63,13 @@ func (h *DatabaseHandler) UpdateDBData(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	log.Println("Running updater.LoadData()")
 	err, errorMsgs := updater.LoadData(true, h.query)
 	if err != nil {
 		render.Render(w, r, ErrorServer(err))
 		return
 	}
+	log.Println("Done updater.LoadData()")
 
 	err = h.query.AddDBDataUpdate(context.Background(), store.AddDBDataUpdateParams{
 		IsOk:     err == nil,

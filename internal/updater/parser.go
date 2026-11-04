@@ -2,6 +2,7 @@ package updater
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/Quak1/chuy-gbf/internal/store"
@@ -65,6 +66,9 @@ func parseLookup(id, input string, lists *CategoryLists) DataItem {
 				img = last(i[0])
 			case "characters":
 				img = last(i[6])
+				if n := findJumpIndex(i[6]); n != -1 {
+					img = i[6][n-1]
+				}
 			}
 
 			if img == "" {
@@ -87,6 +91,39 @@ func last(a []string) string {
 		return ""
 	}
 	return a[len(a)-1]
+}
+
+func findJumpIndex(items []string) int {
+	if len(items) < 2 {
+		return -1
+	}
+
+	prevNum, err := parseSuffix(items[0])
+	if err != nil {
+		return -1
+	}
+
+	for i := 1; i < len(items); i++ {
+		currNum, err := parseSuffix(items[i])
+		if err != nil {
+			return -1
+		}
+
+		if currNum-prevNum != 1 {
+			return i
+		}
+		prevNum = currNum
+	}
+
+	return -1
+}
+
+func parseSuffix(s string) (int, error) {
+	parts := strings.Split(s, "_")
+	if len(parts) < 2 {
+		return 0, fmt.Errorf("no underscore delimiter found in %s", s)
+	}
+	return strconv.Atoi(parts[1])
 }
 
 func parseData(data *Data) []DataItem {
