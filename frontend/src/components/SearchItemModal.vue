@@ -93,7 +93,7 @@ const handleElementFilter = (element: string) => {
           class="item"
           :key="item.id"
         >
-          <ItemImage :item="item" />
+          <ItemImage :item="item" disabled />
           <div>{{ item.name }}</div>
         </div>
       </div>
@@ -164,7 +164,6 @@ input {
 
   a {
     flex-shrink: 0;
-    pointer-events: none;
   }
 }
 .paginator {

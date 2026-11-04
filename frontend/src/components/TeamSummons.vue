@@ -42,7 +42,7 @@ const subSummons = computed(() => sliceTeam(props.summons, 6, 8));
           :key="i"
           @click="emit('select', summon.position)"
         >
-          <ItemImage v-if="'type' in summon" :item="summon" party />
+          <ItemImage v-if="'type' in summon" :item="summon" party disabled />
           <EmptyItemImage v-else category="summon" />
         </button>
       </div>
@@ -56,7 +56,7 @@ const subSummons = computed(() => sliceTeam(props.summons, 6, 8));
           :key="i"
           @click="emit('select', summon.position)"
         >
-          <ItemImage v-if="'type' in summon" :item="summon" party />
+          <ItemImage v-if="'type' in summon" :item="summon" party disabled />
           <EmptyItemImage v-else category="summon" />
         </button>
       </div>

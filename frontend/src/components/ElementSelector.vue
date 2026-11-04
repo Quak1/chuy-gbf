@@ -2,8 +2,9 @@
 import { computed, onMounted, ref } from "vue";
 import type { Item } from "../models";
 
-const props = defineProps<{
+const { items, defaultElement = "dark" } = defineProps<{
   items: Item[];
+  defaultElement?: string;
 }>();
 
 const emit = defineEmits<{
@@ -13,10 +14,10 @@ const emit = defineEmits<{
 const activeElement = ref("");
 
 const elements = computed(() => [
-  ...new Set(props.items?.map((item) => item.element)),
+  ...new Set(items?.map((item) => item.element)),
 ]);
+
 onMounted(() => {
-  const defaultElement = "dark";
   const element = elements.value.includes(defaultElement)
     ? defaultElement
     : elements.value[0];
