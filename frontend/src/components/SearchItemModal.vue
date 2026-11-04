@@ -76,7 +76,7 @@ const handleElementFilter = (element: string) => {
 <template>
   <Modal @close="emit('close')">
     <div class="container">
-      <h3>Edit {{ data.category.slice(0, -1) }}</h3>
+      <h3>Edit {{ data.category }}</h3>
       <input type="text" v-model="search" />
       <button @click="emit('set', 'clear')">Remove item</button>
 
@@ -91,6 +91,7 @@ const handleElementFilter = (element: string) => {
           v-for="item in paginated"
           @click="emit('set', item.id)"
           class="item"
+          :key="item.id"
         >
           <ItemImage :item="item" />
           <div>{{ item.name }}</div>
@@ -107,6 +108,7 @@ const handleElementFilter = (element: string) => {
           v-for="n in pages"
           @click="page = n"
           :class="{ active: page === n }"
+          :key="n"
         >
           {{ n + 1 }}
         </button>
@@ -146,6 +148,7 @@ input {
 
   .item {
     margin: 5px 0;
+    min-height: 80px;
     display: flex;
     align-items: center;
     gap: 10px;

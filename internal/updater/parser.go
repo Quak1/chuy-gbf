@@ -64,7 +64,7 @@ func parseLookup(id, input string, lists *CategoryLists) DataItem {
 			case "summons":
 				img = last(i[0])
 			case "characters":
-				img = last(i[5])
+				img = last(i[6])
 			}
 
 			if img == "" {
