@@ -21,6 +21,7 @@ const weapons = computed(() => sliceTeam(props.weapons, 2, 11));
 <template>
   <div class="container">
     <div class="main">
+      <img src="/img/Main_Weapon_label.png" />
       <button @click="emit('select', mainWeapon.position)">
         <ItemImage
           v-if="'type' in mainWeapon"
@@ -66,9 +67,19 @@ button {
   border: none;
 }
 
-.main button {
-  width: 112px;
-  height: 235px;
+.main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  img {
+    display: block;
+    width: 120px;
+  }
+  button {
+    width: 112px;
+    height: 235px;
+  }
 }
 
 .sub {

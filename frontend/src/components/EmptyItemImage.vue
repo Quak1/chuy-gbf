@@ -19,6 +19,7 @@ const src = computed(() => getEmptyImagePath(props));
 img {
   width: 100%;
   max-height: 100%;
+  max-width: 100%;
   min-width: 50px;
   display: block;
 }

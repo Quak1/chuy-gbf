@@ -22,16 +22,19 @@ const subSummons = computed(() => sliceTeam(props.summons, 6, 8));
 <template>
   <div class="container">
     <div class="top">
-      <button @click="emit('select', mainSummon.position)">
-        <ItemImage
-          v-if="'type' in mainSummon"
-          :item="mainSummon"
-          highRes
-          portrait
-          disabled
-        />
-        <EmptyItemImage v-else category="summon" portrait />
-      </button>
+      <div class="main-summon">
+        <img src="/img/Main_Summon_label.png" />
+        <button @click="emit('select', mainSummon.position)">
+          <ItemImage
+            v-if="'type' in mainSummon"
+            :item="mainSummon"
+            highRes
+            portrait
+            disabled
+          />
+          <EmptyItemImage v-else category="summon" portrait />
+        </button>
+      </div>
 
       <div class="cards">
         <button
@@ -47,6 +50,7 @@ const subSummons = computed(() => sliceTeam(props.summons, 6, 8));
 
     <div class="bot">
       <div class="cards">
+        <img src="/img/Sub_Aura_label.png" />
         <button
           v-for="(summon, i) in subSummons"
           :key="i"
@@ -67,6 +71,13 @@ const subSummons = computed(() => sliceTeam(props.summons, 6, 8));
   border-width: 2px;
   border-image: linear-gradient(to bottom right, #95c9e5, #afb2a2) 1;
   margin: 10px 0;
+}
+
+.main-summon {
+  img {
+    width: 130px;
+    display: block;
+  }
 }
 
 button {
@@ -93,17 +104,23 @@ button {
   }
 }
 
-.bot {
-  display: flex;
-  justify-content: end;
-  background: linear-gradient(to bottom right, #814c30, #6e3a21);
-}
-
 .cards {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
   justify-content: center;
   align-items: center;
+}
+
+.bot {
+  justify-content: end;
+  background: linear-gradient(to bottom right, #814c30, #6e3a21);
+
+  .cards {
+    grid-template-columns: repeat(3, 1fr);
+    > img {
+      width: 130px;
+    }
+  }
 }
 </style>
