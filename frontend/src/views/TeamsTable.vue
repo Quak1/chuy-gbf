@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useRouter } from "vue-router";
+import { RouterLink, useRouter } from "vue-router";
 import { useFetch } from "../composables/useFetch";
 import { usePost } from "../composables/usePost";
 import type { Team } from "../models";
@@ -42,7 +42,11 @@ const columns = columnHelper.columns([
   columnHelper.accessor("name", {
     header: "Name",
     cell: (p) =>
-      h("a", { href: `/teams/builder/${p.row.getValue("id")}` }, p.getValue()),
+      h(
+        RouterLink,
+        { to: `/teams/builder/${p.row.original.id}` },
+        p.getValue(),
+      ),
   }),
   columnHelper.accessor("character", {
     header: "Character Images",
