@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"net/http"
@@ -26,6 +27,20 @@ type TeamRequest struct {
 	URL  string `json:"url"`
 }
 
+type SlotItem struct {
+	store.Item
+	Position int64 `json:"position"`
+}
+
+type Team struct {
+	Name       string                         `json:"name"`
+	URL        string                         `json:"url"`
+	ID         int64                          `json:"id"`
+	Characters [6 + 1]*store.GetTeamSlotsRow  `json:"character"`
+	Summons    [7 + 1]*store.GetTeamSlotsRow  `json:"summon"`
+	Weapons    [10 + 1]*store.GetTeamSlotsRow `json:"weapon"`
+}
+
 func (p *TeamRequest) Bind(r *http.Request) error {
 	if p.Name == "" {
 		return errors.New("name field is required")
@@ -35,43 +50,51 @@ func (p *TeamRequest) Bind(r *http.Request) error {
 }
 
 func (h *TeamsHandler) ListTeams(w http.ResponseWriter, r *http.Request) {
-	teams, err := h.query.ListTeams(r.Context())
+	dbTeams, err := h.query.ListTeams(r.Context())
 	if err != nil {
 		render.Render(w, r, ErrorServer(err))
 		return
 	}
 
-	render.JSON(w, r, teams)
-}
+	// TODO handle concurrency style
+	var teams []*Team
+	for _, t := range dbTeams {
+		team, err := h.processTeam(r.Context(), t.ID)
+		if err != nil {
+			HandleDatabaseError(w, r, err)
+			return
+		}
 
-type SlotItem struct {
-	store.Item
-	Position int64 `json:"position"`
+		teams = append(teams, team)
+	}
+
+	render.JSON(w, r, teams)
 }
 
 func (h *TeamsHandler) GetTeam(w http.ResponseWriter, r *http.Request) {
 	teamID := r.Context().Value(TeamIDKey).(int64)
 
-	dbTeam, err := h.query.GetTeam(r.Context(), teamID)
+	team, err := h.processTeam(r.Context(), teamID)
 	if err != nil {
 		HandleDatabaseError(w, r, err)
 		return
 	}
 
-	teamSlots, err := h.query.GetTeamSlots(r.Context(), teamID)
+	render.JSON(w, r, team)
+}
+
+func (h *TeamsHandler) processTeam(ctx context.Context, teamID int64) (*Team, error) {
+	dbTeam, err := h.query.GetTeam(ctx, teamID)
 	if err != nil {
-		HandleDatabaseError(w, r, err)
-		return
+		return nil, err
 	}
 
-	team := struct {
-		Name       string                         `json:"name"`
-		URL        string                         `json:"url"`
-		ID         int64                          `json:"id"`
-		Characters [6 + 1]*store.GetTeamSlotsRow  `json:"character"`
-		Summons    [7 + 1]*store.GetTeamSlotsRow  `json:"summon"`
-		Weapons    [10 + 1]*store.GetTeamSlotsRow `json:"weapon"`
-	}{
+	teamSlots, err := h.query.GetTeamSlots(ctx, teamID)
+	if err != nil {
+		return nil, err
+	}
+
+	team := Team{
 		ID:   dbTeam.ID,
 		Name: dbTeam.Name,
 		URL:  dbTeam.Url,
@@ -88,7 +111,7 @@ func (h *TeamsHandler) GetTeam(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	render.JSON(w, r, team)
+	return &team, nil
 }
 
 func (h *TeamsHandler) CreateTeam(w http.ResponseWriter, r *http.Request) {

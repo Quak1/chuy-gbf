@@ -12,6 +12,7 @@ const itemsURL = computed(() => {
   <nav>
     <RouterLink to="/">Home</RouterLink>
     <RouterLink v-if="user" :to="itemsURL">Items</RouterLink>
+    <RouterLink v-if="user" to="/teams">Teams</RouterLink>
     <RouterLink v-if="!user" to="/login">Login</RouterLink>
     <RouterLink v-if="user?.role === 'admin'" to="/items"
       >Items Admin</RouterLink

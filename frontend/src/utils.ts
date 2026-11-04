@@ -10,12 +10,14 @@ interface Config {
   highRes: boolean;
   portrait: boolean;
   party: boolean;
+  square: boolean;
 }
 export function getItemImageURL({
   item,
   highRes,
   portrait,
   party,
+  square,
 }: Config): string {
   let url = highRes ? baseURL : lowBaseURl;
 
@@ -27,11 +29,11 @@ export function getItemImageURL({
           ? `${baseURL}/leader/raid_normal/${item.image_name}.jpg`
           : `${url}/leader/m/${item.id}_01.jpg`;
       }
-      return `${url}/npc/${portrait ? "f" : "m"}/${item.image_name}.jpg`;
+      return `${url}/npc/${portrait ? "f" : square ? "s" : "m"}/${item.image_name}.jpg`;
     case "summon":
-      return `${url}/summon/${portrait ? "party_main" : party ? "party_sub" : "m"}/${item.image_name}.jpg`;
+      return `${url}/summon/${portrait ? "party_main" : party ? "party_sub" : square ? "s" : "m"}/${item.image_name}.jpg`;
     case "weapon":
-      return `${url}/weapon/${portrait ? "ls" : "m"}/${item.image_name}.jpg`;
+      return `${url}/weapon/${portrait ? "ls" : square ? "s" : "m"}/${item.image_name}.jpg`;
     default:
       console.error("item has no category", item);
   }
