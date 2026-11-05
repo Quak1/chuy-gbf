@@ -70,7 +70,6 @@ const subSummons = computed(() => sliceTeam(props.summons, 6, 8));
   border-style: solid;
   border-width: 2px;
   border-image: linear-gradient(to bottom right, #95c9e5, #afb2a2) 1;
-  margin: 10px 0;
 }
 
 .main-summon {

@@ -138,18 +138,18 @@ const handleDeleteTeam = async () => {
 
   <div v-if="teamLoading">Loading...</div>
 
-  <div v-else-if="team">
+  <div v-else-if="team" class="team-container">
     <TeamCharacters
       :characters="team.character"
       @select="(idx) => handleSelect(idx, 'character')"
     />
-    <TeamSummons
-      :summons="team.summon"
-      @select="(idx) => handleSelect(idx, 'summon')"
-    />
     <TeamWeapons
       :weapons="team.weapon"
       @select="(idx) => handleSelect(idx, 'weapon')"
+    />
+    <TeamSummons
+      :summons="team.summon"
+      @select="(idx) => handleSelect(idx, 'summon')"
     />
   </div>
 
@@ -180,5 +180,12 @@ const handleDeleteTeam = async () => {
   h1 {
     margin: 0;
   }
+}
+
+.team-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-start;
 }
 </style>
