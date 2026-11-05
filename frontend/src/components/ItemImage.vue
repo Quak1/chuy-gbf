@@ -29,10 +29,9 @@ const src = computed(() => getItemImageURL(props));
 
 <template>
   <a
-    :href="`https://gbf.wiki/${item.wiki_path}`"
+    :href="disabled ? undefined : `https://gbf.wiki/${item.wiki_path}`"
     target="_blank"
     rel="noopener noreferrer"
-    :class="{ disabled }"
   >
     <img
       :src
@@ -40,6 +39,7 @@ const src = computed(() => getItemImageURL(props));
       :class="{ max150: !highRes }"
       :style="imageStyle"
       :loading="lazyLoading ? 'lazy' : undefined"
+      :title="item.name"
     />
   </a>
 </template>
