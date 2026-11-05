@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watchEffect } from "vue";
+import { computed, watchEffect } from "vue";
 import type { ItemCategory, SearchItemModalData, Team } from "../models";
 import TeamCharacters from "../components/TeamCharacters.vue";
 import TeamSummons from "../components/TeamSummons.vue";
@@ -12,6 +12,7 @@ import SearchItemModal from "../components/SearchItemModal.vue";
 import { usePost } from "../composables/usePost";
 import { useItems } from "../composables/useItems";
 import EditTeamModal from "../components/EditTeamModal.vue";
+import { useFetch } from "../composables/useFetch";
 
 const props = defineProps<{
   teamId: String;
@@ -19,12 +20,12 @@ const props = defineProps<{
 
 const router = useRouter();
 const {
-  call,
   data: teamData,
   error: teamError,
   loading: teamLoading,
   statusCode,
-} = useAPI<Team>();
+} = useFetch<Team>(`/api/teams/${props.teamId}`);
+const { call: apiCall } = useAPI();
 const { selectedData, openModal, closeModal } = useModal<SearchItemModalData>();
 const {
   selectedData: editTeamOpen,
@@ -34,14 +35,7 @@ const {
 const { post, error } = usePost();
 const { items } = useItems();
 
-const team = ref(getEmptyTeam());
-
-watchEffect(async () => {
-  await call(`/api/teams/${props.teamId}`, {});
-  if (teamData.value) {
-    team.value = teamData.value;
-  }
-});
+const team = computed(() => (teamData.value ? teamData.value : getEmptyTeam()));
 
 watchEffect(() => {
   if (teamError.value && statusCode.value === 404) {
@@ -114,6 +108,18 @@ const handleUpdateTeam = async (name: string, url: string) => {
   team.value.url = url;
   closeModal();
 };
+
+const handleDeleteTeam = async () => {
+  if (!confirm("Delete this team?")) {
+    return;
+  }
+
+  const ok = await apiCall(`/api/teams/${team.value.id}`, { method: "DELETE" });
+  if (!ok) {
+    console.error(error);
+    alert("Error deleting this team. Please try again later!");
+  } else router.push({ name: "TeamsTable" });
+};
 </script>
 
 <template>
@@ -121,6 +127,7 @@ const handleUpdateTeam = async (name: string, url: string) => {
     <div class="title">
       <h1>{{ team.name }}</h1>
       <button @click="openEditTeam(team)">Edit</button>
+      <button @click="handleDeleteTeam">Delete</button>
     </div>
 
     <div>
