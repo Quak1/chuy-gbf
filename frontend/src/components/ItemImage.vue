@@ -3,14 +3,26 @@ import { computed } from "vue";
 import type { Item } from "../models";
 import { getItemImageURL } from "../utils";
 
-const props = defineProps<{
+const {
+  height = "auto",
+  width = "100%",
+  ...props
+} = defineProps<{
   item: Item;
   highRes?: boolean;
   portrait?: boolean;
   lazyLoading?: boolean;
   disabled?: boolean;
   party?: boolean;
+  square?: boolean;
+  height?: number | string;
+  width?: number | string;
 }>();
+
+const imageStyle = computed(() => ({
+  height: typeof height === "number" ? `${height}px` : height,
+  width: typeof width === "number" ? `${width}px` : width,
+}));
 
 const src = computed(() => getItemImageURL(props));
 </script>
@@ -26,6 +38,7 @@ const src = computed(() => getItemImageURL(props));
       :src
       :alt="item.name"
       :class="{ max150: !highRes }"
+      :style="imageStyle"
       :loading="lazyLoading ? 'lazy' : undefined"
     />
   </a>
@@ -35,11 +48,11 @@ const src = computed(() => getItemImageURL(props));
 .disabled {
   pointer-events: none;
 }
+
 img {
-  width: 100%;
-  height: auto;
   min-width: 50px;
   display: block;
+  max-width: 100%;
 }
 
 .max150 {

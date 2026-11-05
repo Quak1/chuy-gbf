@@ -21,7 +21,7 @@ function onCancel(e: Event) {
   </dialog>
 </template>
 
-<style>
+<style scoped>
 dialog {
   padding: 20px;
   width: 400px;

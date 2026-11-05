@@ -5,7 +5,7 @@ import Login from "./views/Login.vue";
 import UserItems from "./views/UserItems.vue";
 import AdminItems from "./views/AdminItems.vue";
 import TeamBuilder from "./views/TeamBuilder.vue";
-import TeamsTable from "./views/TeamsTable.vue";
+import TeamRows from "./views/TeamRows.vue";
 
 export const router = createRouter({
   history: createWebHistory(),
@@ -14,7 +14,7 @@ export const router = createRouter({
     { path: "/:pathMatch(.*)*", name: "NotFound", component: NotFound },
     { path: "/login", name: "Login", component: Login },
     { path: "/items", name: "Items", component: AdminItems },
-    { path: "/teams", name: "TeamsTable", component: TeamsTable },
+    { path: "/teams", name: "TeamsTable", component: TeamRows },
     {
       path: "/teams/builder/:teamId(\\d+)",
       name: "TeamBuilder",

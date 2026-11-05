@@ -80,7 +80,7 @@ const handleCreate = (value: ItemValue) => {
   </Modal>
 </template>
 
-<style>
+<style scoped>
 dialog {
   background-color: var(--accent);
   width: fit-content;

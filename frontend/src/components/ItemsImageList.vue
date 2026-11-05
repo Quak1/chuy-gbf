@@ -1,38 +1,19 @@
 <script setup lang="ts">
-import { computed } from "vue";
 import type { ItemCategory, SlotItem } from "../models";
-import { getItemImageURL } from "../utils";
+import ItemImage from "./ItemImage.vue";
 
 const props = defineProps<{
   items: SlotItem[];
   category: ItemCategory;
   lazyLoading?: boolean;
 }>();
-
-const srcs = computed(() =>
-  props.items
-    .filter((item) => item !== null)
-    .map((item) => ({
-      url: getItemImageURL({
-        item,
-        highRes: false,
-        portrait: false,
-        party: false,
-        square: true,
-      }),
-      name: item.name,
-    })),
-);
 </script>
 
 <template>
   <div>
-    <img
-      v-for="src in srcs"
-      :src="src.url"
-      :alt="src.name"
-      :loading="lazyLoading ? 'lazy' : undefined"
-    />
+    <template v-for="item in items">
+      <ItemImage v-if="item" :item square :height="50" />
+    </template>
   </div>
 </template>
 
@@ -41,11 +22,10 @@ div {
   display: flex;
   flex-wrap: wrap;
   gap: 5px;
+  align-items: center;
 }
 
-img {
-  height: 65px;
-  width: auto;
-  display: block;
+.empty {
+  background-color: black;
 }
 </style>

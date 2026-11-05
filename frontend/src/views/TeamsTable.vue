@@ -7,6 +7,7 @@ import {
   columnFilteringFeature,
   createColumnHelper,
   createFilteredRowModel,
+  filterFn_includesString,
   FlexRender,
   tableFeatures,
   useTable,
@@ -34,7 +35,9 @@ const handleCreateBtn = async () => {
 const features = tableFeatures({
   columnFilteringFeature,
   filteredRowModel: createFilteredRowModel(),
-  filterFns: {},
+  filterFns: {
+    includesString: filterFn_includesString,
+  },
 });
 
 const columnHelper = createColumnHelper<typeof features, Team>();
