@@ -1,43 +1,35 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+@import "tailwindcss";
+@import "@nuxt/ui";
+@import url("https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800&display=swap");
+
+@theme {
+  --font-sans: 'Figtree', sans-serif;
+}
+
+@layer base {
+  body {
+    line-height: 1.6;
+  }
+}
+
 :root {
-  --text: #c9ada7;
-  --bg: #22223b;
-  --border: #4a4e69;
-  --accent: #9a8c98;
-  --accent-light: #f2e9e4;
-  --black-clear: rgba(0, 0, 0, 0.6);
-
-  font-family: Roboto, sans-serif;
-  font-size: 16px;
-  text-rendering: optimizeLegibility;
-  color: var(--text);
-  background: var(--bg);
-  color-scheme: dark light;
+  --ui-radius: 0.75rem;
 }
 
-body {
-  margin: 0;
-  padding: 0 50px;
+:root, .light {
+  --ui-bg: var(--ui-color-neutral-50);
+  --ui-bg-muted: var(--ui-color-neutral-100);
+  --ui-text-inverted: var(--ui-color-neutral-50);
 }
 
-p {
-  margin:0;
-}
-
-h1,
-h2 {
-  font-weight: 500;
-}
-
-th,
-td {
-  white-space: nowrap;
-  border: 1px solid var(--border);
-}
-
-tbody tr:hover {
-  box-shadow: inset 0 0 0 100px rgba(255, 255, 255, 0.1);
-}
-
-button {
-  cursor: pointer;
+.dark {
+  --ui-text-highlighted: var(--ui-color-neutral-50);
+  --ui-bg-inverted: var(--ui-color-neutral-50);
+  --ui-border-inverted: var(--ui-color-neutral-50);
+  --ui-bg: var(--ui-color-neutral-900);
+  --ui-bg-muted: var(--ui-color-neutral-800);
+  --ui-text-inverted: var(--ui-color-neutral-900);
 }
