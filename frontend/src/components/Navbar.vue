@@ -1,51 +1,50 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useUser } from "../composables/useUser";
+import type { NavigationMenuItem } from "@nuxt/ui";
 
 const { user, logout } = useUser(false);
-const itemsURL = computed(() => {
-  return `/users/${user.value?.id}/items`;
+
+const navItems = computed(() => {
+  const items: NavigationMenuItem[] = [
+    {
+      label: "My Items",
+      to: `/users/${user.value?.id}/items`,
+      show: !!user.value && user.value.role !== "admin",
+    },
+    {
+      label: "Teams",
+      to: "/teams",
+      show: !!user.value,
+    },
+    {
+      label: "Login",
+      to: "/login",
+      show: !user.value,
+    },
+    {
+      label: "Items Admin",
+      to: "/items",
+      show: user.value?.role === "admin",
+    },
+  ];
+
+  return items.filter((item) => item.show);
 });
 </script>
 
 <template>
-  <nav>
-    <RouterLink to="/">Home</RouterLink>
-    <RouterLink v-if="user" :to="itemsURL">Items</RouterLink>
-    <RouterLink v-if="user" to="/teams">Teams</RouterLink>
-    <RouterLink v-if="!user" to="/login">Login</RouterLink>
-    <RouterLink v-if="user?.role === 'admin'" to="/items"
-      >Items Admin</RouterLink
-    >
-    <button v-if="user" @click="logout">Logout</button>
-  </nav>
+  <UHeader title="GBF">
+    <UNavigationMenu :items="navItems" />
+
+    <template #right>
+      <UButton
+        v-if="user"
+        @click="logout"
+        color="error"
+        variant="soft"
+        label="Logout"
+      />
+    </template>
+  </UHeader>
 </template>
-
-<style scoped>
-nav {
-  margin: 20px 0;
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-}
-
-a,
-button {
-  color: var(--accent-light);
-  text-decoration: none;
-  padding: 8px 10px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background-color: transparent;
-  font-size: 1em;
-  display: flex;
-  align-items: center;
-  line-height: 1;
-}
-
-.router-link-exact-active {
-  color: var(--accent-light);
-  font-weight: bold;
-  border-bottom: 2px solid var(--accent-light);
-}
-</style>

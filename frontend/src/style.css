@@ -1,9 +1,8 @@
-@import "tailwindcss";
-@import "@nuxt/ui";
-
-@import "tailwindcss";
-@import "@nuxt/ui";
 @import url("https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800&display=swap");
+@import "tailwindcss";
+@import "@nuxt/ui";
+@import "tailwindcss";
+@import "@nuxt/ui";
 
 @theme {
   --font-sans: 'Figtree', sans-serif;
@@ -13,6 +12,11 @@
   body {
     line-height: 1.6;
   }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
 }
 
 :root {
