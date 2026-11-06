@@ -89,3 +89,40 @@ export function sliceTeam(items: SlotItem[], start: number, end: number) {
       item !== null ? item : { position: i + start, name: "-" },
     );
 }
+
+export function flattenItemsObject(items: Record<string, Item>) {
+  return Object.values(items).map((i) => ({
+    label: i.name.charAt(0).toUpperCase() + i.name.slice(1),
+    id: i.id,
+  }));
+}
+
+interface Identifiable {
+  id: string;
+}
+
+export function areAllIn<A extends Identifiable, B extends Identifiable>(
+  a: A[],
+  b: (B | null)[],
+): boolean {
+  return a.every((itemA) =>
+    b.some((itemB) => (itemB === null ? false : itemA.id === itemB.id)),
+  );
+}
+
+export function isAnyIn<A extends Identifiable, B extends Identifiable>(
+  a: A[],
+  b: (B | null)[],
+): boolean {
+  return a.some((itemA) =>
+    b.some((itemB) => (itemB === null ? false : itemA.id === itemB.id)),
+  );
+}
+
+export function isIn<A extends Identifiable, B extends Identifiable>(
+  checkAll: boolean,
+  a: A[],
+  b: (B | null)[],
+): boolean {
+  return checkAll ? areAllIn(a, b) : !isAnyIn(a, b);
+}
