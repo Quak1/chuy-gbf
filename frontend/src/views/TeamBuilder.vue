@@ -21,7 +21,7 @@ const props = defineProps<{
 const router = useRouter();
 const {
   data: teamData,
-  error: teamError,
+  // error: teamError,
   loading: teamLoading,
   statusCode,
 } = useFetch<Team>(`/api/teams/${props.teamId}`);
@@ -38,7 +38,7 @@ const { items } = useItems();
 const team = computed(() => (teamData.value ? teamData.value : getEmptyTeam()));
 
 watchEffect(() => {
-  if (teamError.value && statusCode.value === 404) {
+  if (statusCode.value === 404) {
     router.replace({ name: "NotFound" });
   }
 });
