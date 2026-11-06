@@ -2,7 +2,7 @@
 import { computed, onMounted, ref } from "vue";
 import type { Item } from "../models";
 
-const { items, defaultElement = "dark" } = defineProps<{
+const { items, defaultElement = "" } = defineProps<{
   items: Item[];
   defaultElement?: string;
 }>();
@@ -14,57 +14,30 @@ const emit = defineEmits<{
 const activeElement = ref("");
 
 const elements = computed(() => [
+  "clear",
   ...new Set(items?.map((item) => item.element)),
 ]);
 
 onMounted(() => {
-  const element = elements.value.includes(defaultElement)
-    ? defaultElement
-    : elements.value[0];
-
-  emit("update", element);
-  activeElement.value = element;
+  emit("update", defaultElement);
+  activeElement.value = defaultElement;
 });
 
 const handleClick = (element: string) => {
+  if (element === "clear") element = "";
   emit("update", element);
   activeElement.value = element;
 };
 </script>
 
 <template>
-  <div>
-    <button
+  <div class="flex justify-center gap-1 m-2">
+    <UButton
       v-for="e in elements"
       @click="handleClick(e)"
-      :class="{ active: activeElement === e }"
+      :variant="activeElement === e ? 'solid' : 'outline'"
     >
-      {{ e }}
-    </button>
+      {{ e[0].toUpperCase() + e.slice(1) }}
+    </UButton>
   </div>
 </template>
-
-<style scoped>
-div {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin: 10px;
-}
-
-button {
-  padding: 10px;
-  font-size: 16px;
-  background-color: var(--border);
-  border-radius: 10px;
-  border: none;
-  text-transform: capitalize;
-}
-button:hover {
-  filter: brightness(0.8);
-}
-
-.active {
-  border: 2px dashed var(--accent-light);
-}
-</style>
