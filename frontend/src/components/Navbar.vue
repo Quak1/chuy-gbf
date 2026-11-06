@@ -34,7 +34,7 @@ const navItems = computed(() => {
 </script>
 
 <template>
-  <UHeader title="GBF">
+  <UHeader title="GBF" :toggle="false" :ui="{ center: 'flex' }">
     <UNavigationMenu :items="navItems" />
 
     <template #right>

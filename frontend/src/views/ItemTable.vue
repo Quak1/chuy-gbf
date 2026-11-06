@@ -1,25 +1,69 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, h, ref } from "vue";
 import { useFetch } from "../composables/useFetch";
-import type { TableData } from "../models";
+import type { ItemValue, TableData, User } from "../models";
 import ElementSelector from "../components/ElementSelector.vue";
 import ItemImage from "../components/ItemImage.vue";
-import CommentIcon from "../components/icons/CommentIcon.vue";
 import HoverTooltip from "../components/HoverTooltip.vue";
+import type { TableColumn, TableRow } from "@nuxt/ui";
 
 const { data, error, loading } = useFetch<TableData>("/api/users/items");
-const elementFilter = ref("dark");
-const searchString = ref("");
+const elementFilter = ref("");
 
-const filteredItems = computed(() => {
+const users = computed(() => {
   if (!data.value) return [];
 
-  return data.value.items.filter((item) => {
-    const matchElement = elementFilter.value === item.element;
-    const matchItemName = item.name.includes(searchString.value);
-    return matchElement && matchItemName;
-  });
+  return Object.values(data.value.users).map((user) => ({
+    user: { id: user.id, username: user.username, comment: user.comment },
+    ...user.values,
+  }));
 });
+
+type DynamicRow = Record<string, unknown>;
+const columns = computed<TableColumn<DynamicRow>[]>(() => {
+  if (!data.value) return [];
+
+  const filtered = data.value.items.filter((item) => {
+    const matchElement =
+      elementFilter.value === "" || elementFilter.value === item.element;
+    return matchElement;
+  });
+
+  const columns = filtered.map((item) => {
+    const column: TableColumn<DynamicRow> = {
+      accessorKey: item.id,
+      header: () => h(ItemImage, { item: item }, ""),
+      cell: ({ row }) => {
+        const value: ItemValue | undefined = row.getValue(item.id);
+        return value
+          ? h(
+              "div",
+              {
+                class:
+                  "flex items-center justify-center rounded-full p-1 font-semibold text-lg leading-none",
+                style: { backgroundColor: value.color, color: "white" },
+              },
+              value.value,
+            )
+          : "";
+      },
+      meta: {
+        style: { th: { width: "100px", minWidth: "100px", maxWidth: "100px" } },
+      },
+    };
+    return column;
+  });
+
+  columns.unshift({
+    accessorKey: "user",
+    header: "",
+    meta: { style: { th: { minWidth: "75px", maxWidth: "fit-content" } } },
+  });
+
+  return columns;
+});
+
+const getUser = (row: TableRow<DynamicRow>) => row.original.user as User;
 </script>
 
 <template>
@@ -32,140 +76,24 @@ const filteredItems = computed(() => {
       @update="(e) => (elementFilter = e)"
     />
 
-    <div class="search-container">
-      <label for="search">Item search: </label>
-      <input
-        type="text"
-        id="search"
-        v-model="searchString"
-        autocomplete="off"
-      />
-    </div>
-
-    <div v-if="data" class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th></th>
-            <th v-for="item in filteredItems" :key="item.id">
-              <ItemImage :item="item" />
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="user in data.users" :key="user.id">
-            <td>
-              <div>
-                <RouterLink :to="`/users/${user.id}/items`"
-                  >{{ user.username }}
-                </RouterLink>
-                <HoverTooltip v-if="user.comment" class="tooltip">
-                  <template #outer>
-                    <CommentIcon />
-                  </template>
-                  {{ user.comment }}
-                </HoverTooltip>
-              </div>
-            </td>
-            <td v-for="item in filteredItems" :key="item.id">
-              <div :style="{ backgroundColor: user.values[item.id]?.color }">
-                {{ user.values[item.id]?.value }}
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <UTable
+      :data="users"
+      :columns="columns"
+      :columnPinning="{ left: ['user'] }"
+      @select="() => {}"
+      :ui="{ th: 'p-0', td: 'p-0', base: 'min-w-0' }"
+    >
+      <template #user-cell="{ row }">
+        <div class="p-1 flex justify-between items-center gap-1">
+          <RouterLink :to="`/users/${getUser(row).id}/items`">
+            {{ getUser(row).username }}
+          </RouterLink>
+          <HoverTooltip
+            v-if="getUser(row).comment"
+            :text="getUser(row).comment"
+          />
+        </div>
+      </template>
+    </UTable>
   </div>
 </template>
-
-<style scoped>
-.search-container {
-  margin: 10px 0;
-
-  input {
-    padding: 5px;
-    background-color: var(--accent-light);
-    color: var(--bg);
-    border: 2px solid var(--bg);
-    border-radius: 30px;
-  }
-}
-
-.table-container {
-  overflow-x: auto;
-  padding-bottom: 25px;
-}
-
-table {
-  table-layout: fixed;
-  border-collapse: collapse;
-  user-select: none;
-}
-
-th {
-  padding: 0;
-}
-
-tr th:first-child,
-tr td:first-child {
-  position: sticky;
-  left: 0;
-  z-index: 1;
-  background-color: var(--border);
-  border: 1px solid var(--black-clear);
-}
-
-tr th:first-child {
-  min-width: 100px;
-}
-tr th:not(:first-child) {
-  width: 100px;
-  min-width: 100px;
-}
-
-tr td:first-child {
-  > div {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  padding: 5px;
-  a {
-    text-decoration: none;
-    color: inherit;
-  }
-  a:hover {
-    filter: brightness(1.3);
-  }
-}
-
-tr td:not(:first-child) {
-  padding: 0px;
-  height: 100%;
-  height: 28px;
-
-  div {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    height: 100%;
-    padding: 5px;
-    margin: 1px;
-    box-sizing: border-box;
-    border-radius: 50px;
-
-    font-weight: bold;
-    line-height: 0em;
-    color: var(--black-clear);
-  }
-}
-
-.tooltip {
-  margin-left: 10px;
-  height: 20px;
-  width: 20px;
-}
-</style>
