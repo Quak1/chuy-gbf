@@ -6,6 +6,7 @@
 
 @theme {
   --font-sans: 'Figtree', sans-serif;
+  --color-ink: rgb(0 0 0 /0.7)
 }
 
 @layer base {

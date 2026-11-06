@@ -6,20 +6,12 @@ import { useFetch } from "../composables/useFetch";
 import { useRoute, useRouter } from "vue-router";
 import ElementSelector from "../components/ElementSelector.vue";
 import ItemImage from "../components/ItemImage.vue";
-import { useModal } from "../composables/useModal";
 import AddCommentModal from "../components/AddCommentModal.vue";
 import HoverTooltip from "../components/HoverTooltip.vue";
-import CommentIcon from "../components/icons/CommentIcon.vue";
 import { useAPI } from "../composables/useAPI";
 import { useUser } from "../composables/useUser";
 
 const elementFilter = ref("dark");
-const { selectedData, openModal, closeModal } = useModal<UserItem>();
-const {
-  selectedData: modalComment,
-  openModal: openCommentModal,
-  closeModal: closeCommentModal,
-} = useModal<string>();
 
 const route = useRoute();
 const userID = computed(() => {
@@ -40,19 +32,18 @@ function handleItemUpdate(updatedItem: UserItem) {
 
   const index = data.value.findIndex((i) => i.id === updatedItem.id);
   if (index !== -1) data.value[index] = updatedItem;
-
-  closeModal();
 }
 
 function handleComment(comment: string) {
-  closeCommentModal();
   if (!userData.value) return;
   userData.value.comment = comment;
 }
 
 const filteredItems = computed(() => {
   if (!data.value) return [];
-  return data.value.filter((item) => item.element == elementFilter.value);
+  return data.value.filter(
+    (item) => elementFilter.value === "" || item.element == elementFilter.value,
+  );
 });
 
 const handleDeleteUser = async () => {
@@ -69,114 +60,45 @@ const handleDeleteUser = async () => {
 </script>
 
 <template>
-  <div v-if="loading">Loading...</div>
+  <div v-if="loading" class="text-info">Loading...</div>
   <div v-if="data">
+    <div
+      v-if="userData && user?.role !== 'admin'"
+      class="flex justify-center items-center gap-1 my-2"
+    >
+      <AddCommentModal
+        :userID="userID"
+        @update="handleComment"
+        :comment="userData.comment"
+      />
+      <HoverTooltip v-if="userData.comment" :text="userData.comment" />
+    </div>
+
     <ElementSelector
       v-if="data"
       :items="data"
       @update="(e) => (elementFilter = e)"
     />
 
-    <div
-      v-if="userData && user?.role !== 'admin'"
-      class="center comment-container"
-    >
-      <button @click="openCommentModal('commenting')">
-        {{ userData.comment ? "Edit" : "Add" }} user comment
-      </button>
-      <HoverTooltip v-if="userData.comment" class="tooltop">
-        <template #outer>
-          <CommentIcon />
-        </template>
-        {{ userData.comment }}
-      </HoverTooltip>
-    </div>
-
     <div v-if="user?.role === 'admin'" class="center">
-      <button @click="handleDeleteUser">Delete user</button>
+      <UButton @click="handleDeleteUser" color="error">Delete user</UButton>
     </div>
 
-    <div class="container">
-      <div v-for="item in filteredItems" :key="item.id">
+    <div class="flex flex-wrap gap-2">
+      <UCard
+        v-for="item in filteredItems"
+        :key="item.id"
+        :title="item.name"
+        variant="subtle"
+        :ui="{
+          header: 'capitalize p-2 sm:p-2',
+          body: 'p-1 sm:p-1 flex flex-col items-center',
+          root: 'w-[200px]',
+        }"
+      >
         <ItemImage :item="item" />
-        <h3>{{ item.name }}</h3>
-        <p :style="{ backgroundColor: item.color }">
-          {{ item.value || "no value" }}
-        </p>
-        <button @click="openModal(item)">Edit</button>
-      </div>
+        <EditItemModal :item="item" @update="handleItemUpdate" />
+      </UCard>
     </div>
-
-    <EditItemModal
-      v-if="selectedData"
-      :item="selectedData"
-      @close="closeModal"
-      @update="handleItemUpdate"
-    />
-
-    <AddCommentModal
-      v-if="modalComment"
-      :userID="userID"
-      @close="closeCommentModal"
-      @update="handleComment"
-    />
   </div>
 </template>
-
-<style scoped>
-.center {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.comment-container {
-  gap: 10px;
-  margin: 10px;
-
-  .tooltop {
-    width: 30px;
-    height: 30px;
-  }
-}
-button {
-  font-size: inherit;
-}
-
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.container > div {
-  width: 200px;
-  padding: 10px;
-  border: 2px solid var(--border);
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-
-  a {
-    align-self: center;
-  }
-
-  h3 {
-    margin: 0;
-    text-transform: capitalize;
-  }
-
-  p {
-    color: var(--black-clear);
-    background-color: rgba(255, 255, 255, 0.2);
-    font-size: 20px;
-    text-align: center;
-    border-radius: 20px;
-    padding: 5px 0;
-    margin-top: auto;
-  }
-}
-</style>

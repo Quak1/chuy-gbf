@@ -40,8 +40,8 @@ const columns = computed<TableColumn<DynamicRow>[]>(() => {
               "div",
               {
                 class:
-                  "flex items-center justify-center rounded-full p-1 font-semibold text-lg leading-none",
-                style: { backgroundColor: value.color, color: "white" },
+                  "flex items-center justify-center rounded-full p-1 font-semibold text-lg leading-none text-ink",
+                style: { backgroundColor: value.color },
               },
               value.value,
             )

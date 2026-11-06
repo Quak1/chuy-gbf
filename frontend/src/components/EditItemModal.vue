@@ -3,7 +3,6 @@ import { ref } from "vue";
 import type { ItemValue, UserItem } from "../models";
 import { usePost } from "../composables/usePost";
 import { useUser } from "../composables/useUser";
-import Modal from "./Modal.vue";
 import { useFetch } from "../composables/useFetch";
 
 const props = defineProps<{
@@ -11,10 +10,10 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  close: [];
   update: [item: UserItem];
 }>();
 
+const open = ref(false);
 const valueChoice = ref<ItemValue | null>(null);
 const { user } = useUser(false);
 const { post, error, loading } = usePost();
@@ -25,11 +24,6 @@ const {
 } = useFetch<ItemValue[]>(`/api/items/${props.item.id}/values`);
 
 async function submitValue(value: ItemValue) {
-  if (!value) {
-    emit("close");
-    return;
-  }
-
   const url = `/api/users/${user.value?.id}/items/${props.item.id}`;
   const ok = await post(url, {
     valueID: value.id,
@@ -41,52 +35,45 @@ async function submitValue(value: ItemValue) {
       color: value.color,
       value: value.value,
     });
+    open.value = false;
   }
 }
 </script>
 
 <template>
-  <Modal @close="$emit('close')">
-    <div v-if="loading">Loading...</div>
-    <div v-if="!loadingFetch">
-      <h3>Edit {{ item.name }}</h3>
+  <UModal :title="`Edit ${item.name}`" v-model:open="open">
+    <UButton
+      class="w-full flex justify-center mt-1 font-bold text-base text-ink"
+      :style="{ backgroundColor: item.color }"
+      >{{ item.value || " - " }}</UButton
+    >
 
-      <div class="values">
-        <button
-          v-for="value in data"
-          :key="value.id"
-          :style="{ backgroundColor: value.color }"
-          @click="submitValue(value)"
-        >
-          {{ value.value }}
-        </button>
+    <template #body>
+      <div v-if="loading">Loading...</div>
+
+      <div v-if="!loadingFetch">
+        <div class="flex gap-2">
+          <UButton
+            v-for="value in data"
+            :key="value.id"
+            class="text-ink"
+            size="xl"
+            :style="{ backgroundColor: value.color }"
+            @click="submitValue(value)"
+          >
+            {{ value.value }}
+          </UButton>
+        </div>
+
+        <p v-if="error" class="text-error">POST | {{ error }}</p>
+        <p v-if="errorFetch" class="text-error">GET | {{ errorFetch }}</p>
       </div>
+    </template>
 
-      <div class="buttons">
-        <button @click="emit('close')" :disabled="loading">Cancel</button>
-      </div>
-
-      <p v-if="error">POST | {{ error }}</p>
-      <p v-if="errorFetch">GET | {{ errorFetch }}</p>
-    </div>
-  </Modal>
+    <template #footer>
+      <UButton @click="open = false" :disabled="loading" color="neutral"
+        >Cancel</UButton
+      >
+    </template>
+  </UModal>
 </template>
-
-<style scoped>
-.buttons {
-  display: flex;
-  justify-content: end;
-  gap: 10px;
-}
-
-.values {
-  display: flex;
-  gap: 10px;
-
-  button {
-    font-size: 20px;
-    color: var(--black-clear);
-    border: 2px solid var(--black-clear);
-  }
-}
-</style>
