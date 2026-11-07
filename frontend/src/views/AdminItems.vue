@@ -1,19 +1,21 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, useTemplateRef } from "vue";
 import { useFetch } from "../composables/useFetch";
 import type { DBUpdate, Item } from "../models";
 import { useUser } from "../composables/useUser";
 import { usePost } from "../composables/usePost";
 import { useRouter } from "vue-router";
-import { useModal } from "../composables/useModal";
 import AdminItemSetupModal from "../components/AdminItemSetupModal.vue";
+import { getPaginationRowModel, type Row } from "@tanstack/vue-table";
 import ItemImage from "../components/ItemImage.vue";
+import type { DropdownMenuItem, TableColumn } from "@nuxt/ui";
 
 type UpdateDBResponse = {
   message: string;
   errors?: string[];
 };
 
+const table = useTemplateRef("table");
 const router = useRouter();
 const { user } = useUser();
 const { data, loading, error } = useFetch<Item[]>("/api/items");
@@ -24,11 +26,14 @@ const {
   data: dataUpdate,
   error: errorUpdate,
 } = usePost<UpdateDBResponse>();
+
 const elementFilter = ref("");
 const typeFilter = ref("");
 const seriesFilter = ref("");
-const searchFilter = ref("");
-const { selectedData, openModal, closeModal } = useModal<Item>();
+const globalFilter = ref("");
+const selectedItem = ref<Item>();
+
+const editItemModalOpen = ref(false);
 
 if (user.value?.role !== "admin") {
   router.push({ name: "Home" });
@@ -53,16 +58,12 @@ const filtered = computed(() => {
   if (!data.value) return [];
 
   return data.value.filter((item) => {
-    const matchSearch =
-      !searchFilter.value ||
-      item.name.includes(searchFilter.value) ||
-      item.id.includes(searchFilter.value);
     const matchElement =
       !elementFilter.value || item.element === elementFilter.value;
     const matchType = !typeFilter.value || item.type === typeFilter.value;
     const matchSeries =
       !seriesFilter.value || item.series === seriesFilter.value;
-    return matchSearch && matchElement && matchType && matchSeries;
+    return matchElement && matchType && matchSeries;
   });
 });
 
@@ -99,107 +100,103 @@ const handlePostUpdateData = async (forceUpdate = false) => {
     alert("Successful database data update.");
   }
 };
+
+const columns: TableColumn<Item>[] = [
+  { accessorKey: "id" },
+  { accessorKey: "name" },
+  { accessorKey: "element" },
+  { accessorKey: "type" },
+  { accessorKey: "series" },
+  { id: "actions", meta: { class: { td: "text-right" } } },
+];
+
+const pagination = ref({
+  pageIndex: 0,
+  pageSize: 30,
+});
+
+function getRowActions(row: Row<Item>): DropdownMenuItem[] {
+  return [
+    {
+      label: `${row.original.enabled ? "Disable" : "Enable"} item`,
+      icon: `${row.original.enabled ? "i-lucide-eye-closed" : "i-lucide-eye"}`,
+      onSelect: () => toggleEnabled(row.original),
+    },
+    {
+      label: "Edit values",
+      icon: "i-lucide-pencil",
+      onSelect: () => {
+        selectedItem.value = row.original;
+        editItemModalOpen.value = true;
+      },
+    },
+  ];
+}
 </script>
 
 <template>
   <AdminItemSetupModal
-    v-if="selectedData"
-    :item="selectedData"
-    @close="closeModal"
+    v-model:open="editItemModalOpen"
+    v-if="selectedItem"
+    :item="selectedItem"
   />
 
   <div class="container">
     <div v-if="loading">Loading</div>
     <div v-if="error">{{ error }}</div>
 
-    <div class="top">
-      <label
-        >Search
-        <input type="text" v-model="searchFilter" />
-      </label>
+    <div class="flex justify-between py-3 border-b border-accented">
+      <UInput v-model="globalFilter" class="max-w-sm" placeholder="Filter..." />
 
       <div>
-        <span v-if="updateFetchData"
-          >Last update: {{ updateFetchData.created_at }} |
+        <span v-if="updateFetchData" class="text-sm text-muted"
+          >Last update: {{ updateFetchData.created_at }}
         </span>
-        <button @click="handlePostUpdateData(false)">Update DB Data</button>
-        | <a href="/api/database/backup">Download DB backup</a>
+        | <a href="/api/database/backup">Download DB backup</a> |
+        <UButton @click="handlePostUpdateData(false)" variant="outline"
+          >Update DB Data</UButton
+        >
       </div>
     </div>
 
-    <table v-if="filtered">
-      <thead>
-        <tr>
-          <td>ID</td>
-          <td>Name</td>
-          <td>
-            <button @click="elementFilter = ''">Element</button>
-            <select v-model="elementFilter">
-              <option v-for="element in elements">{{ element }}</option>
-            </select>
-          </td>
-          <td>
-            <button @click="typeFilter = ''">Type</button>
-            <select v-model="typeFilter">
-              <option v-for="type in types">{{ type }}</option>
-            </select>
-          </td>
-          <td>
-            <button @click="seriesFilter = ''">Series</button>
-            <select v-model="seriesFilter">
-              <option v-for="s in series">{{ s }}</option>
-            </select>
-          </td>
-          <td>Setup</td>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="item in filtered" :key="item.id">
-          <td>
-            <ItemImage :item="item" lazyLoading />
-            {{ item.id }}
-          </td>
-          <td>
-            {{ item.name }}
-          </td>
-          <td>{{ item.element }}</td>
-          <td>{{ item.type }}</td>
-          <td>{{ item.series }}</td>
-          <td>
-            <button @click="toggleEnabled(item)">
-              {{ item.enabled ? "Disable" : "Enable" }}
-            </button>
-            <button @click="openModal(item)">Edit values</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <UTable
+      ref="table"
+      :data="filtered"
+      :columns="columns"
+      v-model:global-filter="globalFilter"
+      v-model:pagination="pagination"
+      :pagination-options="{ getPaginationRowModel: getPaginationRowModel() }"
+      @select="() => {}"
+      :ui="{ td: 'p-0' }"
+      :meta="{
+        class: { tr: (row) => (row.original.enabled ? 'bg-primary/10' : '') },
+      }"
+    >
+      <template #id-cell="{ row }">
+        <div class="w-[100px] text-center">
+          <ItemImage :item="row.original" />
+          <p>{{ row.original.id }}</p>
+        </div>
+      </template>
+
+      <template #actions-cell="{ row }">
+        <UDropdownMenu :items="getRowActions(row)" :content="{ align: 'end' }">
+          <UButton
+            icon="i-lucide-ellipsis-vertical"
+            color="neutral"
+            variant="ghost"
+          />
+        </UDropdownMenu>
+      </template>
+    </UTable>
+
+    <div class="flex justify-end border-t border-default py-4">
+      <UPagination
+        :page="(table?.tableApi?.getState().pagination.pageIndex || 0) + 1"
+        :items-per-page="table?.tableApi?.getState().pagination.pageSize"
+        :total="table?.tableApi?.getFilteredRowModel().rows.length"
+        @update:page="(p: number) => table?.tableApi?.setPageIndex(p - 1)"
+      />
+    </div>
   </div>
 </template>
-
-<style scoped>
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-table {
-  width: 100%;
-}
-td {
-  word-break: break-word;
-  overflow-wrap: break-word;
-}
-tr td:first-child {
-  width: 100px;
-  text-align: center;
-}
-
-thead button {
-  display: block;
-}
-
-.top {
-  display: flex;
-  justify-content: space-between;
-}
-</style>

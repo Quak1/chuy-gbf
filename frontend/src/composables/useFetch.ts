@@ -6,12 +6,12 @@ export function useFetch<T>(url: string) {
   const loading = ref(false);
   const statusCode = ref<number | null>(null);
 
-  const fetchData = () => {
+  const fetchData = (fetchUrl = url) => {
     data.value = null;
     error.value = null;
     loading.value = true;
 
-    fetch(toValue(url))
+    fetch(toValue(fetchUrl))
       .then((res) => {
         statusCode.value = res.status;
         return res.json();
@@ -25,5 +25,5 @@ export function useFetch<T>(url: string) {
     fetchData();
   });
 
-  return { data, error, loading, statusCode };
+  return { data, error, loading, statusCode, fetchData };
 }

@@ -1,43 +1,19 @@
 <script setup lang="ts">
-import { watch } from "vue";
+import { computed, watchEffect } from "vue";
 import { useFetch } from "../composables/useFetch";
 import type { Item, ItemValue } from "../models";
-import Modal from "./Modal.vue";
 import ValuePicker from "./ValuePicker.vue";
 
 const props = defineProps<{
   item: Item;
 }>();
 
-const emit = defineEmits(["close", "updated"]);
+const open = defineModel<boolean>("open");
 
-const { data, loading, error } = useFetch<ItemValue[]>(
-  `/api/items/${props.item.id}/values`,
-);
+const apiUrl = computed(() => `/api/items/${props.item.id}/values`);
+const { data, loading, error, fetchData } = useFetch<ItemValue[]>(apiUrl.value);
 
-let tempId = -1;
-
-const addEmptyValue = () => {
-  if (!data.value) data.value = [];
-
-  const lastItem = data.value.at(-1);
-  if (lastItem && lastItem.id < 0) return;
-
-  data.value.push({
-    id: tempId--,
-    item_id: props.item.id,
-    value: "",
-    color: "#FFFFFF",
-  });
-};
-
-watch(
-  data,
-  (newData) => {
-    if (newData) addEmptyValue();
-  },
-  { immediate: true },
-);
+watchEffect(() => fetchData(apiUrl.value));
 
 const handleDelete = (value: ItemValue) => {
   if (!data.value) return;
@@ -50,46 +26,27 @@ const handleCreate = (value: ItemValue) => {
   const lastIndex = data.value.length - 1;
   if (data.value[lastIndex].id < 0) {
     data.value[lastIndex] = value;
-    addEmptyValue();
   }
-
-  console.log(data.value);
 };
 </script>
 
 <template>
-  <Modal @close="emit('close')">
-    <div>
-      <h3>Edit values {{ item.name }}</h3>
-
-      <ValuePicker
-        v-for="value in data"
-        :value="value"
-        :key="value.id"
-        @delete="handleDelete"
-        @create="handleCreate"
-      />
-
-      <div class="buttons">
-        <button @click="emit('close')" :disabled="loading">Close</button>
+  <UModal v-model:open="open" :title="`Edit ${item.name} values`">
+    <template #body>
+      <div class="flex flex-wrap gap-2" v-if="data">
+        <ValueDisplay
+          v-for="value in data"
+          :value="value"
+          @delete="handleDelete"
+        />
       </div>
 
-      <p v-if="loading">Loading...</p>
-      <p v-if="error">{{ error }}</p>
-    </div>
-  </Modal>
-</template>
+      <USeparator class="my-3" />
 
-<style scoped>
-dialog {
-  background-color: var(--accent);
-  width: fit-content;
-}
-.buttons {
-  display: flex;
-  align-items: center;
-  justify-content: end;
-  gap: 5px;
-  margin-top: 10px;
-}
-</style>
+      <ValuePicker v-if="item" :item="item" @create="handleCreate" />
+
+      <p v-if="loading" class="text-info">Loading...</p>
+      <p v-if="error" class="text-error">{{ error }}</p>
+    </template>
+  </UModal>
+</template>

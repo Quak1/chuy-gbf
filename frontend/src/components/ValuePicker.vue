@@ -1,26 +1,21 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
-import type { ItemValue } from "../models";
-import { useAPI } from "../composables/useAPI";
+import { ref } from "vue";
+import type { Item, ItemValue } from "../models";
 import { usePost } from "../composables/usePost";
 
 const props = defineProps<{
-  value: ItemValue;
+  item: Item;
 }>();
 
 const emit = defineEmits<{
-  delete: [id: ItemValue];
   create: [value: ItemValue];
 }>();
 
 const defaultColors = ["#11734b", "#d4edbc", "#ffe6a0", "#ffcfc9", "#b10202"];
 
-const itemValue = ref(props.value);
-const draftColor = ref(itemValue.value.color);
-const draftValue = ref(itemValue.value.value);
-const validValue = computed(() => itemValue.value.id > 0);
+const draftColor = ref("#FFFFFF");
+const draftValue = ref("0");
 
-const { call, data, error, loading } = useAPI();
 const {
   post,
   data: postData,
@@ -28,72 +23,48 @@ const {
   loading: postLoading,
 } = usePost<ItemValue>();
 
-const API_BASE = `/api/items/${itemValue.value.item_id}/values`;
-const handleDelete = async () => {
-  const ok = await call(`${API_BASE}/${itemValue.value.id}`, {
-    method: "DELETE",
-  });
-  if (ok) emit("delete", itemValue.value);
-  else {
-    console.error("error", error.value);
-    console.error("data", data.value);
-  }
-};
+const API_BASE = `/api/items/${props.item.id}/values`;
 
 const handleCreate = async () => {
   const ok = await post(`${API_BASE}`, {
     value: draftValue.value,
     color: draftColor.value,
   });
+
   if (ok && postData.value) {
-    itemValue.value = postData.value;
-    emit("create", itemValue.value);
+    emit("create", postData.value);
+
+    draftColor.value = "#FFFFFF";
+    draftValue.value = "0";
   }
 };
 </script>
 
 <template>
-  <div :inert="loading || postLoading">
-    <span :inert="validValue">
-      <input type="text" v-model="draftValue" />
-      <input type="color" v-model="draftColor" />
+  <div>
+    <div class="flex items-center justify-center gap-5">
+      <div>
+        <UInput
+          type="text"
+          v-model="draftValue"
+          autofocus
+          :style="{ backgroundColor: draftColor }"
+          :ui="{ base: 'text-ink font-bold text-center' }"
+        />
+        <div class="flex justify-center gap-1 mt-1">
+          <UButton
+            v-for="color in defaultColors"
+            @click="draftColor = color"
+            class="size-[30px]"
+            :style="{ backgroundColor: color }"
+          ></UButton>
+        </div>
+      </div>
 
-      <button
-        class="defaultColor"
-        v-if="!validValue"
-        v-for="color in defaultColors"
-        :style="{ backgroundColor: color }"
-        @click="draftColor = color"
-      ></button>
-    </span>
+      <UColorPicker type="color" v-model="draftColor" />
+    </div>
 
-    <button v-if="validValue" @click="handleDelete">Delete</button>
-    <button v-if="!validValue" @click="handleCreate">Save</button>
-
-    <p>{{ error }}</p>
-    <p>{{ postError }}</p>
+    <p class="text-error">{{ postError }}</p>
+    <UButton @click="handleCreate" :loading="postLoading">Save</UButton>
   </div>
 </template>
-
-<style scoped>
-div {
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  padding: 5px;
-
-  span {
-    display: flex;
-    align-items: center;
-  }
-}
-.defaultColor {
-  margin: 3px;
-  padding: 0;
-  width: 25px;
-  height: 25px;
-  border: none;
-  border-radius: 20px;
-}
-</style>
