@@ -41,17 +41,23 @@ if (user.value?.role !== "admin") {
 
 const elements = computed(() => {
   if (!data.value) return [];
-  return [...new Set(data.value.map((item) => item.element))];
+  const unique = new Set(data.value.map((item) => item.element));
+  unique.delete("");
+  return [...unique];
 });
 
 const types = computed(() => {
   if (!data.value) return [];
-  return [...new Set(data.value.map((item) => item.type))];
+  const unique = new Set(data.value.map((item) => item.type));
+  unique.delete("");
+  return [...unique];
 });
 
 const series = computed(() => {
   if (!data.value) return [];
-  return [...new Set(data.value.map((item) => item.series))];
+  const unique = new Set(data.value.map((item) => item.series));
+  unique.delete("");
+  return [...unique];
 });
 
 const filtered = computed(() => {
@@ -187,6 +193,36 @@ function getRowActions(row: Row<Item>): DropdownMenuItem[] {
             variant="ghost"
           />
         </UDropdownMenu>
+      </template>
+
+      <template #element-header>
+        <USelectMenu
+          v-model="elementFilter"
+          :items="elements"
+          placeholder="Element"
+          clear
+          class="w-25"
+        />
+      </template>
+
+      <template #type-header>
+        <USelectMenu
+          v-model="typeFilter"
+          :items="types"
+          placeholder="Type"
+          clear
+          class="w-25"
+        />
+      </template>
+
+      <template #series-header>
+        <USelectMenu
+          v-model="seriesFilter"
+          :items="series"
+          placeholder="Series"
+          clear
+          class="w-35"
+        />
       </template>
     </UTable>
 
