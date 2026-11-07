@@ -15,7 +15,7 @@ const {
   data: postData,
   error: postError,
 } = usePost<{ team_id: number }>();
-const { items, error: itemsError, loading: itemsLoading } = useItems();
+const { items, loading: itemsLoading } = useItems();
 
 const handleCreateBtn = async () => {
   const ok = await post("/api/teams", {});
@@ -57,90 +57,56 @@ const tableData = computed(() => {
     return characterFilter && summonFilter && weaponFilter;
   });
 
-  console.log(filtered);
-
-  return data.value;
+  return filtered;
 });
 </script>
 
 <template>
-  <UContainer>
-    <div class="flex">
-      <UButton @click="handleCreateBtn">Create new team</UButton>
+  <div class="flex flex-wrap gap-2 my-5">
+    <UButton @click="handleCreateBtn">Create new team</UButton>
 
-      <FilterSelector
-        v-model="characters"
-        v-model:include="includeCharacters"
-        :items="selectItems.characters"
-        :loading="itemsLoading"
-      />
-      <FilterSelector
-        v-model="weapons"
-        v-model:include="includeWeapons"
-        :items="selectItems.weapons"
-        :loading="itemsLoading"
-      />
-      <FilterSelector
-        v-model="summons"
-        v-model:include="includeSummons"
-        :items="selectItems.summons"
-        :loading="itemsLoading"
-      />
-    </div>
+    <FilterSelector
+      v-model="characters"
+      v-model:include="includeCharacters"
+      :items="selectItems.characters"
+      :loading="itemsLoading"
+    />
+    <FilterSelector
+      v-model="weapons"
+      v-model:include="includeWeapons"
+      :items="selectItems.weapons"
+      :loading="itemsLoading"
+    />
+    <FilterSelector
+      v-model="summons"
+      v-model:include="includeSummons"
+      :items="selectItems.summons"
+      :loading="itemsLoading"
+    />
+  </div>
 
-    <div v-if="loading">Loading...</div>
-    <div v-else-if="error">{{ error }}</div>
+  <div v-if="loading">Loading...</div>
+  <div v-else-if="error">{{ error }}</div>
 
-    <div v-else class="container">
-      <template v-for="row in tableData" class="row">
-        <RouterLink :to="`/teams/builder/${row.id}`">{{ row.name }}</RouterLink>
-        <div class="images">
-          <div class="sub characters">
-            <p>Characters</p>
-            <ItemsImageList :items="row.character" category="character" />
-          </div>
-          <div class="sub summons">
-            <p>Summons</p>
-            <ItemsImageList :items="row.summon" category="summon" />
-          </div>
-          <div class="sub weapons">
-            <p>Weapons</p>
-            <ItemsImageList :items="row.weapon" category="weapon" />
-          </div>
-        </div>
-      </template>
-    </div>
-  </UContainer>
+  <div
+    v-else
+    class="grid grid-cols-[1fr_3fr] items-center gap-2 bg-muted rounded-md p-3"
+  >
+    <template v-for="row in tableData" class="row">
+      <RouterLink :to="`/teams/builder/${row.id}`" class="text-lg underline">{{
+        row.name
+      }}</RouterLink>
+
+      <div class="flex flex-col bg-accented rounded-sm p-3 pt-1">
+        <USeparator label="Characters" position="start" />
+        <ItemsImageList :items="row.character" category="character" />
+
+        <USeparator label="Summons" position="start" />
+        <ItemsImageList :items="row.summon" category="summon" />
+
+        <USeparator label="Weapon" position="start" />
+        <ItemsImageList :items="row.weapon" category="weapon" />
+      </div>
+    </template>
+  </div>
 </template>
-
-<style scoped>
-.container {
-  display: grid;
-  grid-template-columns: 1fr 3fr;
-  align-items: center;
-  gap: 10px;
-}
-
-.images {
-  display: flex;
-  flex-direction: column;
-
-  border-radius: 10px;
-  background-color: var(--border);
-}
-
-.sub {
-  display: flex;
-  align-items: center;
-  padding: 5px;
-
-  &:not(:last-child) {
-    border-bottom: 3px solid var(--accent);
-  }
-
-  > p {
-    width: 100px;
-    flex-shrink: 0;
-  }
-}
-</style>

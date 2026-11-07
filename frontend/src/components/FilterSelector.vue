@@ -9,7 +9,7 @@ const toggleModel = defineModel<boolean | undefined>("include");
 </script>
 
 <template>
-  <div>
+  <div class="flex flex-col justify-center items-center gap-1">
     <USelectMenu
       v-model="model"
       :items="items"
