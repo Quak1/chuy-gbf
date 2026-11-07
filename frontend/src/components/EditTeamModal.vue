@@ -1,23 +1,28 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watchEffect } from "vue";
 import type { Team } from "../models";
-import Modal from "./Modal.vue";
 import { usePost } from "../composables/usePost";
 
 const props = defineProps<{
-  data: Team;
+  team: Team;
 }>();
+
 const emit = defineEmits<{
-  close: [];
   update: [name: string, url: string];
 }>();
 
+const open = ref(false);
 const { post, data, error } = usePost();
-const name = ref(props.data.name);
-const url = ref(props.data.url);
+const name = ref();
+const url = ref();
+
+watchEffect(() => {
+  name.value = props.team.name;
+  url.value = props.team.url;
+});
 
 const handleSubmit = async () => {
-  const ok = await post(`/api/teams/${props.data.id}`, {
+  const ok = await post(`/api/teams/${props.team.id}`, {
     name: name.value,
     url: url.value,
   });
@@ -28,43 +33,31 @@ const handleSubmit = async () => {
     alert("There was an error updating the team. Try again later!");
   }
 
-  emit("close");
+  open.value = false;
 };
 </script>
 
 <template>
-  <Modal @close="emit('close')">
-    <form @submit.prevent="handleSubmit">
-      <h2>Edit Team:</h2>
-      <div>
-        <label for="name">Name: </label>
-        <input id="name" type="text" v-model="name" />
-      </div>
-      <div>
-        <label for="url">Source: </label>
-        <input id="url" type="text" v-model="url" />
-      </div>
-      <div class="buttons">
-        <button type="button" @click="emit('close')">Cancel</button>
-        <button type="submit">Save</button>
-      </div>
-    </form>
-  </Modal>
-</template>
+  <UModal v-model:open="open" title="Edit Team">
+    <UButton @click="open = true">Edit</UButton>
 
-<style scoped>
-h2 {
-  margin: 5px 0;
-}
-input {
-  padding: 5px;
-}
-form > div {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-.buttons {
-  justify-content: space-between;
-}
-</style>
+    <template #body>
+      <form @submit.prevent="handleSubmit">
+        <UFormField label="Name" size="xl" required>
+          <UInput v-model="name" type="text" class="w-full" />
+        </UFormField>
+
+        <UFormField label="Source" size="xl" class="mb-3">
+          <UInput v-model="url" type="text" class="w-full" />
+        </UFormField>
+
+        <div class="flex justify-between">
+          <UButton type="button" @click="open = false" color="neutral"
+            >Cancel</UButton
+          >
+          <UButton type="submit">Save</UButton>
+        </div>
+      </form>
+    </template>
+  </UModal>
+</template>

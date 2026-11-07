@@ -27,11 +27,6 @@ const {
 } = useFetch<Team>(`/api/teams/${props.teamId}`);
 const { call: apiCall } = useAPI();
 const { selectedData, openModal, closeModal } = useModal<SearchItemModalData>();
-const {
-  selectedData: editTeamOpen,
-  openModal: openEditTeam,
-  closeModal: closeEditTeam,
-} = useModal<Team>();
 const { post, error } = usePost();
 const { items } = useItems();
 
@@ -103,10 +98,9 @@ const clearItem = async (category: ItemCategory, position: number) => {
   team.value[category][position] = null;
 };
 
-const handleUpdateTeam = async (name: string, url: string) => {
+const handleUpdateTeam = (name: string, url: string) => {
   team.value.name = name;
   team.value.url = url;
-  closeModal();
 };
 
 const handleDeleteTeam = async () => {
@@ -123,14 +117,16 @@ const handleDeleteTeam = async () => {
 </script>
 
 <template>
-  <div class="header">
-    <div class="title">
-      <h1>{{ team.name }}</h1>
-      <button @click="openEditTeam(team)">Edit</button>
-      <button @click="handleDeleteTeam">Delete</button>
+  <div class="my-3">
+    <div class="flex items-center gap-2">
+      <h1 class="text-xl">{{ team.name }}</h1>
+      <EditTeamModal v-if="team" :team="team" @update="handleUpdateTeam" />
+      <UButton @click="handleDeleteTeam" color="error" variant="outline"
+        >Delete</UButton
+      >
     </div>
 
-    <div>
+    <div class="text-sm text-muted">
       <span> Source: </span>
       <a v-if="team.url" :href="team.url">{{ team.url }}</a>
     </div>
@@ -138,7 +134,7 @@ const handleDeleteTeam = async () => {
 
   <div v-if="teamLoading">Loading...</div>
 
-  <div v-else-if="team" class="team-container">
+  <div v-else-if="team" class="flex flex-wrap gap-2 items-start">
     <TeamCharacters
       :characters="team.character"
       @select="(idx) => handleSelect(idx, 'character')"
@@ -159,33 +155,4 @@ const handleDeleteTeam = async () => {
     @close="closeModal"
     @set="handleSetItem"
   />
-  <EditTeamModal
-    v-if="editTeamOpen"
-    :data="team"
-    @close="closeEditTeam"
-    @update="handleUpdateTeam"
-  />
 </template>
-
-<style scoped>
-.header {
-  margin-bottom: 15px;
-}
-
-.title {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-
-  h1 {
-    margin: 0;
-  }
-}
-
-.team-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: flex-start;
-}
-</style>
