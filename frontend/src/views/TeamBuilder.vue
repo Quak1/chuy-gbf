@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import { computed, watchEffect } from "vue";
-import type { ItemCategory, SearchItemModalData, Team } from "../models";
+import { computed, ref, watchEffect, watch } from "vue";
+import type { ItemCategory, Team } from "../models";
 import TeamCharacters from "../components/TeamCharacters.vue";
 import TeamSummons from "../components/TeamSummons.vue";
 import TeamWeapons from "../components/TeamWeapons.vue";
 import { useAPI } from "../composables/useAPI";
 import { useRouter } from "vue-router";
 import { getEmptyTeam } from "../utils";
-import { useModal } from "../composables/useModal";
 import SearchItemModal from "../components/SearchItemModal.vue";
 import { usePost } from "../composables/usePost";
 import { useItems } from "../composables/useItems";
@@ -26,10 +25,8 @@ const {
   statusCode,
 } = useFetch<Team>(`/api/teams/${props.teamId}`);
 const { call: apiCall } = useAPI();
-const { selectedData, openModal, closeModal } = useModal<SearchItemModalData>();
 const { post, error } = usePost();
 const { items } = useItems();
-
 const team = computed(() => (teamData.value ? teamData.value : getEmptyTeam()));
 
 watchEffect(() => {
@@ -38,15 +35,22 @@ watchEffect(() => {
   }
 });
 
+const isModalOpen = ref(false);
+const selectedData = ref<{ idx: number; category: ItemCategory } | null>(null);
+
+watch(isModalOpen, () => {
+  if (!isModalOpen.value) selectedData.value = null;
+});
+
 const handleSelect = (idx: number, category: ItemCategory) => {
-  openModal({ idx, category });
+  selectedData.value = { idx, category };
+  isModalOpen.value = true;
 };
 
 const handleSetItem = async (itemId: string) => {
   if (selectedData.value === null) return;
 
-  const category = selectedData.value.category;
-  const position = selectedData.value.idx;
+  const { category, idx: position } = selectedData.value;
 
   if (itemId === "clear") {
     clearItem(category, position);
@@ -54,7 +58,7 @@ const handleSetItem = async (itemId: string) => {
     setItem(itemId, category, position);
   }
 
-  closeModal();
+  isModalOpen.value = false;
 };
 
 const setItem = async (
@@ -69,8 +73,8 @@ const setItem = async (
   });
 
   if (!ok) {
-    console.log(selectedData.value);
-    console.log(error.value);
+    console.error(selectedData.value);
+    console.error(error.value);
     alert(`error`);
   } else if (items.value) {
     const newItem = {
@@ -89,8 +93,8 @@ const clearItem = async (category: ItemCategory, position: number) => {
   });
 
   if (!ok) {
-    console.log(selectedData.value);
-    console.log(error.value);
+    console.error(selectedData.value);
+    console.error(error.value);
     alert(`error`);
     return;
   }
@@ -150,9 +154,9 @@ const handleDeleteTeam = async () => {
   </div>
 
   <SearchItemModal
+    v-model:open="isModalOpen"
     v-if="selectedData"
     :data="selectedData"
-    @close="closeModal"
     @set="handleSetItem"
   />
 </template>
