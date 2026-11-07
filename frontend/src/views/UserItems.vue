@@ -74,15 +74,17 @@ const handleDeleteUser = async () => {
       <HoverTooltip v-if="userData.comment" :text="userData.comment" />
     </div>
 
+    <div v-if="user?.role === 'admin'" class="flex justify-center my-2">
+      <UButton @click="handleDeleteUser" color="error" icon="i-lucide-trash"
+        >Delete user</UButton
+      >
+    </div>
+
     <ElementSelector
       v-if="data"
       :items="data"
       @update="(e) => (elementFilter = e)"
     />
-
-    <div v-if="user?.role === 'admin'" class="center">
-      <UButton @click="handleDeleteUser" color="error">Delete user</UButton>
-    </div>
 
     <div class="flex flex-wrap gap-2">
       <UCard

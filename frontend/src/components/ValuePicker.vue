@@ -13,7 +13,7 @@ const emit = defineEmits<{
 
 const defaultColors = ["#11734b", "#d4edbc", "#ffe6a0", "#ffcfc9", "#b10202"];
 
-const draftColor = ref("#FFFFFF");
+const draftColor = ref(defaultColors[0]);
 const draftValue = ref("0");
 
 const {
@@ -34,7 +34,7 @@ const handleCreate = async () => {
   if (ok && postData.value) {
     emit("create", postData.value);
 
-    draftColor.value = "#FFFFFF";
+    draftColor.value = defaultColors[0];
     draftValue.value = "0";
   }
 };
