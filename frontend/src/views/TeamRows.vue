@@ -69,18 +69,21 @@ const tableData = computed(() => {
       v-model="characters"
       v-model:include="includeCharacters"
       :items="selectItems.characters"
+      label="Characters"
       :loading="itemsLoading"
     />
     <FilterSelector
       v-model="weapons"
       v-model:include="includeWeapons"
       :items="selectItems.weapons"
+      label="Weapons"
       :loading="itemsLoading"
     />
     <FilterSelector
       v-model="summons"
       v-model:include="includeSummons"
       :items="selectItems.summons"
+      label="Summons"
       :loading="itemsLoading"
     />
   </div>

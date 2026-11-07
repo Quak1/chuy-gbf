@@ -2,6 +2,7 @@
 const props = defineProps<{
   items: any;
   loading: boolean;
+  label: string;
 }>();
 
 const model = defineModel<any[] | undefined>();
@@ -10,6 +11,14 @@ const toggleModel = defineModel<boolean | undefined>("include");
 
 <template>
   <div class="flex flex-col justify-center items-center gap-1">
+    <div class="flex items-center gap-3">
+      <p>{{ label }}:</p>
+      <USwitch
+        v-model="toggleModel"
+        :label="toggleModel ? 'Include' : 'Exclude'"
+        :ui="{ label: 'text-muted' }"
+      />
+    </div>
     <USelectMenu
       v-model="model"
       :items="items"
@@ -19,10 +28,7 @@ const toggleModel = defineModel<boolean | undefined>("include");
       multiple
       clear
       class="w-60"
-    />
-    <USwitch
-      v-model="toggleModel"
-      :label="toggleModel ? 'Include' : 'Exclude'"
+      :placeholder="label"
     />
   </div>
 </template>
