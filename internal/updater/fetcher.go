@@ -31,8 +31,18 @@ type Data struct {
 	Jobs       map[string][][]string `json:"job"`
 }
 
-func downloadFile(url string, filepath string) error {
+func downloadFileOptionalOverwrite(url, filepath string, overwrite bool) error {
+	flags := os.O_CREATE | os.O_WRONLY
+	if overwrite {
+		flags |= os.O_TRUNC
+	} else {
+		flags |= os.O_EXCL
+	}
+
 	out, err := os.Create(filepath)
+	if errors.Is(err, os.ErrExist) {
+		return nil
+	}
 	if err != nil {
 		return err
 	}
@@ -50,6 +60,14 @@ func downloadFile(url string, filepath string) error {
 	}
 
 	return nil
+}
+
+func downloadFile(url, filepath string) error {
+	return downloadFileOptionalOverwrite(url, filepath, true)
+}
+
+func downloadFileExcl(url, filepath string) error {
+	return downloadFileOptionalOverwrite(url, filepath, false)
 }
 
 func decodeData(r io.Reader) (*Data, error) {
