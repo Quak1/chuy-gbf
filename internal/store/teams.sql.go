@@ -190,22 +190,26 @@ func (q *Queries) GetTeamSlots(ctx context.Context, id int64) ([]GetTeamSlotsRow
 }
 
 const getTeamWeaponsSkills = `-- name: GetTeamWeaponsSkills :many
-SELECT tws.slot_position, tws.position, ws.name, ws.img
+SELECT tws.position, ws.name, ws.img
 FROM team_weapon_skills tws
 JOIN weapon_skills ws ON tws.weapon_skill_id = ws.id
-WHERE tws.team_id = ?
+WHERE tws.team_id = ? AND tws.slot_position = ?
 ORDER BY tws.slot_position, tws.position
 `
 
-type GetTeamWeaponsSkillsRow struct {
-	SlotPosition int64  `json:"slot_position"`
-	Position     int64  `json:"position"`
-	Name         string `json:"name"`
-	Img          string `json:"img"`
+type GetTeamWeaponsSkillsParams struct {
+	TeamID       int64 `json:"team_id"`
+	SlotPosition int64 `json:"slot_position"`
 }
 
-func (q *Queries) GetTeamWeaponsSkills(ctx context.Context, teamID int64) ([]GetTeamWeaponsSkillsRow, error) {
-	rows, err := q.db.QueryContext(ctx, getTeamWeaponsSkills, teamID)
+type GetTeamWeaponsSkillsRow struct {
+	Position int64  `json:"position"`
+	Name     string `json:"name"`
+	Img      string `json:"img"`
+}
+
+func (q *Queries) GetTeamWeaponsSkills(ctx context.Context, arg GetTeamWeaponsSkillsParams) ([]GetTeamWeaponsSkillsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getTeamWeaponsSkills, arg.TeamID, arg.SlotPosition)
 	if err != nil {
 		return nil, err
 	}
@@ -213,12 +217,7 @@ func (q *Queries) GetTeamWeaponsSkills(ctx context.Context, teamID int64) ([]Get
 	var items []GetTeamWeaponsSkillsRow
 	for rows.Next() {
 		var i GetTeamWeaponsSkillsRow
-		if err := rows.Scan(
-			&i.SlotPosition,
-			&i.Position,
-			&i.Name,
-			&i.Img,
-		); err != nil {
+		if err := rows.Scan(&i.Position, &i.Name, &i.Img); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

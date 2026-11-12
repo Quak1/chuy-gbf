@@ -68,8 +68,8 @@ DELETE FROM team_weapon_skills
 WHERE team_id = ? AND slot_category = ? AND slot_position = ?;
 
 -- name: GetTeamWeaponsSkills :many
-SELECT tws.slot_position, tws.position, ws.name, ws.img
+SELECT tws.position, ws.name, ws.img
 FROM team_weapon_skills tws
 JOIN weapon_skills ws ON tws.weapon_skill_id = ws.id
-WHERE tws.team_id = ?
+WHERE tws.team_id = ? AND tws.slot_position = ?
 ORDER BY tws.slot_position, tws.position;

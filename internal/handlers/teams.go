@@ -114,7 +114,10 @@ func (h *TeamsHandler) processTeam(ctx context.Context, teamID int64) (*Team, er
 		case "weapon":
 			w := &TeamWeapon{GetTeamSlotsRow: item}
 
-			dbSkills, err := h.query.GetTeamWeaponsSkills(ctx, team.ID)
+			dbSkills, err := h.query.GetTeamWeaponsSkills(ctx, store.GetTeamWeaponsSkillsParams{
+				TeamID:       team.ID,
+				SlotPosition: item.Position,
+			})
 			if err != nil {
 				return nil, err
 			}
