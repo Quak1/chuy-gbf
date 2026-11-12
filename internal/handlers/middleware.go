@@ -26,11 +26,13 @@ func NewMiddlware(query *store.Queries) *Middleware {
 type contextKey string
 
 const (
-	UserContextKey contextKey = "user"
-	UsernameKey    contextKey = "username"
-	UserIDKey      contextKey = "userID"
-	ValueIDKey     contextKey = "valueID"
-	TeamIDKey      contextKey = "team"
+	UserContextKey   contextKey = "user"
+	UsernameKey      contextKey = "username"
+	UserIDKey        contextKey = "userID"
+	ValueIDKey       contextKey = "valueID"
+	TeamIDKey        contextKey = "team"
+	SlotPositionKey  contextKey = "slot"
+	SkillPositionKey contextKey = "skillPosition"
 )
 
 func (m *Middleware) URLIntID(param string, key contextKey) func(http.Handler) http.Handler {

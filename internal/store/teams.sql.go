@@ -25,6 +25,44 @@ func (q *Queries) ClearSlot(ctx context.Context, arg ClearSlotParams) error {
 	return err
 }
 
+const clearSlotWeaponSkills = `-- name: ClearSlotWeaponSkills :exec
+DELETE FROM team_weapon_skills
+WHERE team_id = ? AND slot_category = ? AND slot_position = ?
+`
+
+type ClearSlotWeaponSkillsParams struct {
+	TeamID       int64  `json:"team_id"`
+	SlotCategory string `json:"slot_category"`
+	SlotPosition int64  `json:"slot_position"`
+}
+
+func (q *Queries) ClearSlotWeaponSkills(ctx context.Context, arg ClearSlotWeaponSkillsParams) error {
+	_, err := q.db.ExecContext(ctx, clearSlotWeaponSkills, arg.TeamID, arg.SlotCategory, arg.SlotPosition)
+	return err
+}
+
+const clearWeaponSkill = `-- name: ClearWeaponSkill :exec
+DELETE FROM team_weapon_skills
+WHERE team_id = ? AND slot_category = ? AND slot_position = ? AND position = ?
+`
+
+type ClearWeaponSkillParams struct {
+	TeamID       int64  `json:"team_id"`
+	SlotCategory string `json:"slot_category"`
+	SlotPosition int64  `json:"slot_position"`
+	Position     int64  `json:"position"`
+}
+
+func (q *Queries) ClearWeaponSkill(ctx context.Context, arg ClearWeaponSkillParams) error {
+	_, err := q.db.ExecContext(ctx, clearWeaponSkill,
+		arg.TeamID,
+		arg.SlotCategory,
+		arg.SlotPosition,
+		arg.Position,
+	)
+	return err
+}
+
 const createTeam = `-- name: CreateTeam :one
 INSERT INTO teams (name, url) VALUES (?, "") RETURNING id
 `
@@ -43,6 +81,34 @@ DELETE FROM teams WHERE id = ?
 func (q *Queries) DeleteTeam(ctx context.Context, id int64) error {
 	_, err := q.db.ExecContext(ctx, deleteTeam, id)
 	return err
+}
+
+const getSlot = `-- name: GetSlot :one
+SELECT team_id, item_id, category, position FROM team_slots
+WHERE team_id = ? AND category = ? AND position = ?
+`
+
+type GetSlotParams struct {
+	TeamID   int64  `json:"team_id"`
+	Category string `json:"category"`
+	Position int64  `json:"position"`
+}
+
+// -------------------------
+//
+//	SLOTS         --
+//
+// -------------------------
+func (q *Queries) GetSlot(ctx context.Context, arg GetSlotParams) (TeamSlot, error) {
+	row := q.db.QueryRowContext(ctx, getSlot, arg.TeamID, arg.Category, arg.Position)
+	var i TeamSlot
+	err := row.Scan(
+		&i.TeamID,
+		&i.ItemID,
+		&i.Category,
+		&i.Position,
+	)
+	return i, err
 }
 
 const getTeam = `-- name: GetTeam :one
@@ -109,6 +175,49 @@ func (q *Queries) GetTeamSlots(ctx context.Context, id int64) ([]GetTeamSlotsRow
 			&i.Category,
 			&i.WikiPath,
 			&i.ImageName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getTeamWeaponsSkills = `-- name: GetTeamWeaponsSkills :many
+SELECT tws.slot_position, tws.position, ws.name, ws.img
+FROM team_weapon_skills tws
+JOIN weapon_skills ws ON tws.weapon_skill_id = ws.id
+WHERE tws.team_id = ?
+ORDER BY tws.slot_position, tws.position
+`
+
+type GetTeamWeaponsSkillsRow struct {
+	SlotPosition int64  `json:"slot_position"`
+	Position     int64  `json:"position"`
+	Name         string `json:"name"`
+	Img          string `json:"img"`
+}
+
+func (q *Queries) GetTeamWeaponsSkills(ctx context.Context, teamID int64) ([]GetTeamWeaponsSkillsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getTeamWeaponsSkills, teamID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetTeamWeaponsSkillsRow
+	for rows.Next() {
+		var i GetTeamWeaponsSkillsRow
+		if err := rows.Scan(
+			&i.SlotPosition,
+			&i.Position,
+			&i.Name,
+			&i.Img,
 		); err != nil {
 			return nil, err
 		}
@@ -205,11 +314,6 @@ type SetSlotParams struct {
 	ItemID   string `json:"item_id"`
 }
 
-// -------------------------
-//
-//	SLOTS         --
-//
-// -------------------------
 func (q *Queries) SetSlot(ctx context.Context, arg SetSlotParams) error {
 	_, err := q.db.ExecContext(ctx, setSlot,
 		arg.TeamID,
@@ -226,6 +330,34 @@ UPDATE teams SET updated_at = datetime('now') WHERE id = ?
 
 func (q *Queries) SetTeamUpdated(ctx context.Context, id int64) error {
 	_, err := q.db.ExecContext(ctx, setTeamUpdated, id)
+	return err
+}
+
+const setWeaponSkill = `-- name: SetWeaponSkill :exec
+INSERT INTO team_weapon_skills (weapon_skill_id, position, team_id, item_id, slot_category, slot_position)
+VALUES (?, ?, ?, ?, ?, ?)
+ON CONFLICT
+DO UPDATE SET weapon_skill_id = excluded.weapon_skill_id
+`
+
+type SetWeaponSkillParams struct {
+	WeaponSkillID int64  `json:"weapon_skill_id"`
+	Position      int64  `json:"position"`
+	TeamID        int64  `json:"team_id"`
+	ItemID        string `json:"item_id"`
+	SlotCategory  string `json:"slot_category"`
+	SlotPosition  int64  `json:"slot_position"`
+}
+
+func (q *Queries) SetWeaponSkill(ctx context.Context, arg SetWeaponSkillParams) error {
+	_, err := q.db.ExecContext(ctx, setWeaponSkill,
+		arg.WeaponSkillID,
+		arg.Position,
+		arg.TeamID,
+		arg.ItemID,
+		arg.SlotCategory,
+		arg.SlotPosition,
+	)
 	return err
 }
 

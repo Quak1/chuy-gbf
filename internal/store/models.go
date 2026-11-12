@@ -59,6 +59,15 @@ type TeamSlot struct {
 	Position int64  `json:"position"`
 }
 
+type TeamWeaponSkill struct {
+	WeaponSkillID int64  `json:"weapon_skill_id"`
+	Position      int64  `json:"position"`
+	TeamID        int64  `json:"team_id"`
+	ItemID        string `json:"item_id"`
+	SlotCategory  string `json:"slot_category"`
+	SlotPosition  int64  `json:"slot_position"`
+}
+
 type User struct {
 	ID       int64  `json:"id"`
 	Username string `json:"username"`

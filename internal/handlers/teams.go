@@ -32,13 +32,18 @@ type SlotItem struct {
 	Position int64 `json:"position"`
 }
 
+type TeamWeapon struct {
+	store.GetTeamSlotsRow
+	Skills [3 + 1]*store.GetTeamWeaponsSkillsRow `json:"skills"`
+}
+
 type Team struct {
-	Name       string                         `json:"name"`
-	URL        string                         `json:"url"`
-	ID         int64                          `json:"id"`
-	Characters [6 + 1]*store.GetTeamSlotsRow  `json:"character"`
-	Summons    [7 + 1]*store.GetTeamSlotsRow  `json:"summon"`
-	Weapons    [10 + 1]*store.GetTeamSlotsRow `json:"weapon"`
+	Name       string                        `json:"name"`
+	URL        string                        `json:"url"`
+	ID         int64                         `json:"id"`
+	Characters [6 + 1]*store.GetTeamSlotsRow `json:"character"`
+	Summons    [7 + 1]*store.GetTeamSlotsRow `json:"summon"`
+	Weapons    [10 + 1]*TeamWeapon           `json:"weapon"`
 }
 
 func (p *TeamRequest) Bind(r *http.Request) error {
@@ -107,7 +112,20 @@ func (h *TeamsHandler) processTeam(ctx context.Context, teamID int64) (*Team, er
 		case "summon":
 			team.Summons[item.Position] = &item
 		case "weapon":
-			team.Weapons[item.Position] = &item
+			w := &TeamWeapon{GetTeamSlotsRow: item}
+
+			dbSkills, err := h.query.GetTeamWeaponsSkills(ctx, team.ID)
+			if err != nil {
+				return nil, err
+			}
+
+			var skills [4]*store.GetTeamWeaponsSkillsRow
+			for _, s := range dbSkills {
+				skills[s.Position] = &s
+			}
+			w.Skills = skills
+
+			team.Weapons[item.Position] = w
 		}
 	}
 
@@ -223,6 +241,16 @@ func (h *TeamsHandler) SetTeamSlot(w http.ResponseWriter, r *http.Request) {
 
 	qtx := h.query.WithTx(tx)
 
+	err = qtx.ClearSlotWeaponSkills(r.Context(), store.ClearSlotWeaponSkillsParams{
+		TeamID:       teamID,
+		SlotCategory: data.Category,
+		SlotPosition: data.Position,
+	})
+	if err != nil {
+		HandleDatabaseError(w, r, err)
+		return
+	}
+
 	err = qtx.SetSlot(r.Context(), store.SetSlotParams{
 		TeamID:   teamID,
 		Category: data.Category,
@@ -270,6 +298,120 @@ func (h *TeamsHandler) ClearTeamSlot(w http.ResponseWriter, r *http.Request) {
 		TeamID:   teamID,
 		Category: data.Category,
 		Position: data.Position,
+	})
+	if err != nil {
+		HandleDatabaseError(w, r, err)
+		return
+	}
+
+	if err := qtx.SetTeamUpdated(r.Context(), teamID); err != nil {
+		HandleDatabaseError(w, r, err)
+		return
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		render.Render(w, r, ErrorServer(err))
+		return
+	}
+
+	render.NoContent(w, r)
+}
+
+type TeamWeaponSkillRequest struct {
+	SkillId int64 `json:"skill_id"`
+}
+
+func (t *TeamWeaponSkillRequest) Bind(r *http.Request) error {
+	if t.SkillId == 0 {
+		return errors.New("skill_id field is required")
+	}
+
+	return nil
+}
+
+func (h *TeamsHandler) SetWeaponSkill(w http.ResponseWriter, r *http.Request) {
+	teamID := r.Context().Value(TeamIDKey).(int64)
+	slotPosition := r.Context().Value(SlotPositionKey).(int64)
+	skillPosition := r.Context().Value(SkillPositionKey).(int64)
+
+	var data TeamWeaponSkillRequest
+	if err := render.Bind(r, &data); err != nil {
+		render.Render(w, r, ErrorInvalidRequest(err))
+		return
+	}
+
+	tx, err := h.db.Begin()
+	if err != nil {
+		render.Render(w, r, ErrorServer(err))
+		return
+	}
+	defer tx.Rollback()
+
+	qtx := h.query.WithTx(tx)
+
+	slot, err := qtx.GetSlot(r.Context(), store.GetSlotParams{
+		TeamID:   teamID,
+		Category: "weapon",
+		Position: slotPosition,
+	})
+	if err != nil {
+		HandleDatabaseError(w, r, err)
+		return
+	}
+
+	err = qtx.SetWeaponSkill(r.Context(), store.SetWeaponSkillParams{
+		WeaponSkillID: data.SkillId,
+		Position:      skillPosition,
+		TeamID:        slot.TeamID,
+		ItemID:        slot.ItemID,
+		SlotCategory:  slot.Category,
+		SlotPosition:  slot.Position,
+	})
+	if err != nil {
+		HandleDatabaseError(w, r, err)
+		return
+	}
+
+	if err := qtx.SetTeamUpdated(r.Context(), teamID); err != nil {
+		HandleDatabaseError(w, r, err)
+		return
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		render.Render(w, r, ErrorServer(err))
+		return
+	}
+
+	render.NoContent(w, r)
+}
+
+func (h *TeamsHandler) ClearWeaponSkill(w http.ResponseWriter, r *http.Request) {
+	teamID := r.Context().Value(TeamIDKey).(int64)
+	slotPosition := r.Context().Value(SlotPositionKey).(int64)
+	skillPosition := r.Context().Value(SkillPositionKey).(int64)
+
+	var data TeamWeaponSkillRequest
+	if err := render.Bind(r, &data); err != nil {
+		render.Render(w, r, ErrorInvalidRequest(err))
+		return
+	}
+
+	tx, err := h.db.Begin()
+	if err != nil {
+		render.Render(w, r, ErrorServer(err))
+		return
+	}
+	defer tx.Rollback()
+
+	qtx := h.query.WithTx(tx)
+
+	err = qtx.ClearWeaponSkill(r.Context(), store.ClearWeaponSkillParams{
+		TeamID:       teamID,
+		SlotPosition: slotPosition,
+		SlotCategory: "weapon",
+		Position:     skillPosition,
 	})
 	if err != nil {
 		HandleDatabaseError(w, r, err)

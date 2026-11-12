@@ -98,6 +98,14 @@ func SetupRouter(db *sql.DB, distFS fs.FS) *chi.Mux {
 				r.Delete("/", teamsHandler.DeleteTeam)
 				r.Post("/slot", teamsHandler.SetTeamSlot)
 				r.Post("/slot/clear", teamsHandler.ClearTeamSlot)
+
+				r.Route("/weapons/{slot:[0-9]+}/skills/{position:[0-9]+}", func(r chi.Router) {
+					r.Use(middleware.URLIntID("slot", handlers.SlotPositionKey))
+					r.Use(middleware.URLIntID("position", handlers.SkillPositionKey))
+
+					r.Post("/", teamsHandler.SetWeaponSkill)
+					r.Delete("/", teamsHandler.ClearWeaponSkill)
+				})
 			})
 		})
 	})
