@@ -68,6 +68,24 @@ func (q *Queries) CreateItemValue(ctx context.Context, arg CreateItemValueParams
 	return i, err
 }
 
+const createWeaponSkill = `-- name: CreateWeaponSkill :exec
+INSERT INTO weapon_skills(weapon_id, name, img)
+VALUES (?, ?, ?)
+ON CONFLICT(weapon_id, name) DO UPDATE SET
+  img=excluded.img
+`
+
+type CreateWeaponSkillParams struct {
+	WeaponID string `json:"weapon_id"`
+	Name     string `json:"name"`
+	Img      string `json:"img"`
+}
+
+func (q *Queries) CreateWeaponSkill(ctx context.Context, arg CreateWeaponSkillParams) error {
+	_, err := q.db.ExecContext(ctx, createWeaponSkill, arg.WeaponID, arg.Name, arg.Img)
+	return err
+}
+
 const deleteItemValue = `-- name: DeleteItemValue :exec
 DELETE FROM item_values WHERE id = ? AND item_id = ?
 `
@@ -241,6 +259,39 @@ func (q *Queries) GetItemValues(ctx context.Context, itemID string) ([]ItemValue
 			&i.Value,
 			&i.Color,
 		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getWeaponSkills = `-- name: GetWeaponSkills :many
+SELECT name, img FROM weapon_skills
+WHERE weapon_id = ?
+`
+
+type GetWeaponSkillsRow struct {
+	Name string `json:"name"`
+	Img  string `json:"img"`
+}
+
+func (q *Queries) GetWeaponSkills(ctx context.Context, weaponID string) ([]GetWeaponSkillsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getWeaponSkills, weaponID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetWeaponSkillsRow
+	for rows.Next() {
+		var i GetWeaponSkillsRow
+		if err := rows.Scan(&i.Name, &i.Img); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

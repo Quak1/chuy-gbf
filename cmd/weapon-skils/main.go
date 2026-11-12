@@ -45,7 +45,7 @@ func main() {
 
 	client := &http.Client{}
 
-	log.Printf("Parsing %d items, for weapon skills\n", len(items))
+	log.Printf("Parsing %d items for weapon skills\n", len(items))
 
 	for _, item := range items {
 		if item.Category != "weapon" {
@@ -57,10 +57,25 @@ func main() {
 			defer func() { <-sem }()
 
 			wikiUrl := "https://gbf.wiki/" + item.WikiPath
-			_, err := updater.ParseWeaponSkills(client, *dir, wikiUrl)
+			skills, err := updater.ParseWeaponSkills(client, *dir, wikiUrl)
 			if err != nil {
 				failed.Add(1)
 				log.Println(err)
+				return
+			}
+
+			for _, s := range skills {
+				params := store.CreateWeaponSkillParams{
+					WeaponID: item.ID,
+					Name:     s.Name,
+					Img:      s.Img,
+				}
+				err = q.CreateWeaponSkill(context.Background(), params)
+				if err != nil {
+					failed.Add(1)
+					log.Println(err)
+					return
+				}
 			}
 
 			count.Add(1)

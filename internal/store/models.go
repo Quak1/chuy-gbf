@@ -71,3 +71,10 @@ type UserItem struct {
 	ItemID      string `json:"item_id"`
 	ItemValueID int64  `json:"item_value_id"`
 }
+
+type WeaponSkill struct {
+	ID       int64  `json:"id"`
+	WeaponID string `json:"weapon_id"`
+	Name     string `json:"name"`
+	Img      string `json:"img"`
+}

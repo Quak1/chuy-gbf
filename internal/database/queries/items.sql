@@ -37,3 +37,13 @@ DELETE FROM item_values WHERE id = ? AND item_id = ?;
 -- name: GetItemValues :many
 SELECT * FROM item_values
 WHERE item_id = ?;
+
+-- name: CreateWeaponSkill :exec
+INSERT INTO weapon_skills(weapon_id, name, img)
+VALUES (?, ?, ?)
+ON CONFLICT(weapon_id, name) DO UPDATE SET
+  img=excluded.img;
+
+-- name: GetWeaponSkills :many
+SELECT name, img FROM weapon_skills
+WHERE weapon_id = ?;
