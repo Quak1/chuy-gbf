@@ -4,6 +4,7 @@ import (
 	"context"
 	"embed"
 	"errors"
+	"flag"
 	"io/fs"
 	"log"
 	"net/http"
@@ -20,6 +21,9 @@ import (
 var frontendFS embed.FS
 
 func main() {
+	dir := flag.String("dir", "/files", "Directory where weapon skill images are stored")
+	flag.Parse()
+
 	distFS, err := fs.Sub(frontendFS, "dist")
 	if err != nil {
 		log.Fatal("Failed to load frontend assets:", err)
@@ -32,7 +36,7 @@ func main() {
 	}
 	defer db.Close()
 
-	r := routes.SetupRouter(db, distFS)
+	r := routes.SetupRouter(db, distFS, *dir)
 
 	srv := &http.Server{
 		Addr:         ":8080",

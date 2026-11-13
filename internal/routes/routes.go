@@ -13,7 +13,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func SetupRouter(db *sql.DB, distFS fs.FS) *chi.Mux {
+func SetupRouter(db *sql.DB, distFS fs.FS, filesDir string) *chi.Mux {
 	q := store.New(db)
 	r := chi.NewRouter()
 
@@ -112,7 +112,7 @@ func SetupRouter(db *sql.DB, distFS fs.FS) *chi.Mux {
 		})
 	})
 
-	filesHandler := http.StripPrefix("/files/", http.FileServer(http.Dir("./files")))
+	filesHandler := http.StripPrefix("/files/", http.FileServer(http.Dir(filesDir)))
 	r.Get("/files/*", func(w http.ResponseWriter, r *http.Request) {
 		filesHandler.ServeHTTP(w, r)
 	})

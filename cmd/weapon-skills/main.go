@@ -21,7 +21,8 @@ type WeaponSkill struct {
 
 func main() {
 	concurrentLimit := flag.Int("c", 12, "Concurrent weapon parsing limit")
-	dir := flag.String("dir", "weapon-skills", "Directory to save weapon skill images")
+	dir := flag.String("dir", "/files/weapon-skills", "Directory to save weapon skill images")
+	flag.Parse()
 
 	db, err := database.InitDB()
 	if err != nil {
@@ -60,7 +61,7 @@ func main() {
 			skills, err := updater.ParseWeaponSkills(client, *dir, wikiUrl)
 			if err != nil {
 				failed.Add(1)
-				log.Println(err)
+				log.Println(wikiUrl, err)
 				return
 			}
 
@@ -73,7 +74,7 @@ func main() {
 				err = q.CreateWeaponSkill(context.Background(), params)
 				if err != nil {
 					failed.Add(1)
-					log.Println(err)
+					log.Println(wikiUrl, err)
 					return
 				}
 			}

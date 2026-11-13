@@ -59,7 +59,7 @@ func ParseWeaponSkills(client *http.Client, dir, wikiUrl string) ([]*WeaponSkill
 			return nil, err
 		}
 
-		w.Img = imgPath
+		w.Img = filepath.Base(imgPath)
 		skills = append(skills, w)
 	}
 

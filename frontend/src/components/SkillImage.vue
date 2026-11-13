@@ -9,7 +9,7 @@ const props = defineProps<{
 <template>
   <img
     v-if="skill"
-    :src="`/files/${skill.img}`"
+    :src="`/files/weapon-skills/${skill.img}`"
     :alt="skill.name"
     :title="skill.name"
   />
