@@ -9,14 +9,17 @@ FROM golang:1.26-alpine AS backend-builder
 WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
+COPY cmd/ ./cmd/
 COPY internal/ ./internal/
 COPY main.go ./
 COPY --from=frontend-builder /app/dist ./dist
 RUN CGO_ENABLED=0 go build -o server .
+RUN CGO_ENABLED=0 go build ./cmd/weapon-skills
 
 FROM alpine:3.24
 WORKDIR /app
 COPY --from=backend-builder /app/server .
+COPY --from=backend-builder /app/weapon-skills .
 RUN mkdir /data
 ENV DB_PATH=/data/data.db
 EXPOSE 8080

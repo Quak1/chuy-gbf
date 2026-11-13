@@ -7,6 +7,7 @@ services:
       - caddy_net
     volumes:
       - data:/data
+      - files:/files
     labels:
       caddy: gbf.hatvault.win
       caddy.request_body.max_size: 10MB
@@ -16,6 +17,7 @@ services:
 
 volumes:
   data:
+  files:
 
 networks:
   caddy_net:
