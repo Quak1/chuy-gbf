@@ -73,3 +73,9 @@ FROM team_weapon_skills tws
 JOIN weapon_skills ws ON tws.weapon_skill_id = ws.id
 WHERE tws.team_id = ? AND tws.slot_position = ?
 ORDER BY tws.slot_position, tws.position;
+
+-- name: GetSlotSkill :one
+SELECT ws.id, ws.name, ws.img
+FROM team_weapon_skills tws
+JOIN weapon_skills ws ON tws.weapon_skill_id = ws.id
+WHERE tws.team_id = ? AND tws.slot_position = ? AND tws.position = ?;

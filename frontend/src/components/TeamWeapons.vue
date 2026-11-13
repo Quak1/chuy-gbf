@@ -1,30 +1,31 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import type { SlotItem } from "../models";
-import { sliceTeam } from "../utils";
+import type { SlotWeapon } from "../models";
 import ItemImage from "./ItemImage.vue";
 import EmptyItemImage from "./EmptyItemImage.vue";
 
 const props = defineProps<{
-  weapons: SlotItem[];
+  weapons: SlotWeapon[];
   editable?: boolean;
 }>();
 
 const emit = defineEmits<{
   select: [position: number];
+  selectSkillPos: [slot: number, position: number];
 }>();
 
-const mainWeapon = computed(() => sliceTeam(props.weapons, 1, 2)[0]);
-const weapons = computed(() => sliceTeam(props.weapons, 2, 11));
+const mainWeapon = computed(() => props.weapons.slice(1, 2)[0]);
+const weapons = computed(() => props.weapons.slice(2, 11));
 </script>
 
 <template>
   <div class="container">
     <div class="main">
-      <img src="/img/Main_Weapon_label.png" />
-      <button @click="emit('select', mainWeapon.position)">
+      <img src="/img/Main_Weapon_label.png" class="block w-[120px]" />
+
+      <button @click="emit('select', 1)" class="w-[112px] h-[235px]">
         <ItemImage
-          v-if="'type' in mainWeapon"
+          v-if="mainWeapon"
           :item="mainWeapon"
           portrait
           highRes
@@ -32,17 +33,43 @@ const weapons = computed(() => sliceTeam(props.weapons, 2, 11));
         />
         <EmptyItemImage v-else category="weapon" portrait />
       </button>
+
+      <div
+        class="flex justify-center items-center gap-1 h-[40px] bg-[#19373a] rounded-xs mt-0.5 w-full"
+      >
+        <template v-if="mainWeapon">
+          <button
+            v-for="idx in 3"
+            @click="$emit('selectSkillPos', 1, idx)"
+            class="block w-[32px] h-[32px] bg-ink rounded-xs overflow-hidden"
+          >
+            <SkillImage :skill="mainWeapon.skills[idx]" />
+          </button>
+        </template>
+      </div>
     </div>
 
     <div class="sub">
-      <button
-        v-for="(weapon, i) in weapons"
-        :key="i"
-        @click="emit('select', weapon.position)"
-      >
-        <ItemImage v-if="'type' in weapon" :item="weapon" disabled />
-        <EmptyItemImage v-else category="weapon" />
-      </button>
+      <div v-for="(weapon, i) in weapons" :key="i">
+        <button @click="emit('select', i + 2)" class="block w-[120px]">
+          <ItemImage v-if="weapon" :item="weapon" disabled />
+          <EmptyItemImage v-else category="weapon" />
+        </button>
+
+        <div
+          class="flex justify-center items-center gap-1 h-[40px] bg-[#19373a] rounded-xs mt-0.5"
+        >
+          <template v-if="weapon">
+            <button
+              v-for="idx in 3"
+              @click="$emit('selectSkillPos', i + 2, idx)"
+              class="block w-[32px] h-[32px] bg-ink rounded-xs overflow-hidden"
+            >
+              <SkillImage :skill="weapon.skills[idx]" />
+            </button>
+          </template>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -62,7 +89,6 @@ const weapons = computed(() => sliceTeam(props.weapons, 2, 11));
 }
 
 button {
-  width: 110px;
   padding: 0;
   border: none;
 }
@@ -71,15 +97,6 @@ button {
   display: flex;
   flex-direction: column;
   align-items: center;
-
-  img {
-    display: block;
-    width: 120px;
-  }
-  button {
-    width: 112px;
-    height: 235px;
-  }
 }
 
 .sub {

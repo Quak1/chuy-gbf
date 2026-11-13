@@ -64,6 +64,8 @@ func SetupRouter(db *sql.DB, distFS fs.FS) *chi.Mux {
 			r.Get("/enabled", itemsHandler.GetEnabledItems)
 
 			r.Get("/{itemID:[0-9]+}/values", itemsHandler.GetItemValues)
+			r.Get("/{itemID:[0-9]+}/skills", itemsHandler.GetWeaponSkills)
+
 			r.Route("/{itemID:[0-9]+}", func(r chi.Router) {
 				r.Use(middleware.RequireUsername)
 				r.Use(middleware.IsAdminRole)
@@ -108,6 +110,11 @@ func SetupRouter(db *sql.DB, distFS fs.FS) *chi.Mux {
 				})
 			})
 		})
+	})
+
+	filesHandler := http.StripPrefix("/files/", http.FileServer(http.Dir("./files")))
+	r.Get("/files/*", func(w http.ResponseWriter, r *http.Request) {
+		filesHandler.ServeHTTP(w, r)
 	})
 
 	r.Get("/*", func(w http.ResponseWriter, req *http.Request) {

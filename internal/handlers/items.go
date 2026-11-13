@@ -167,3 +167,15 @@ func (h *ItemsHandler) DeleteItemValue(w http.ResponseWriter, r *http.Request) {
 
 	render.NoContent(w, r)
 }
+
+func (h *ItemsHandler) GetWeaponSkills(w http.ResponseWriter, r *http.Request) {
+	itemID := chi.URLParam(r, "itemID")
+
+	skills, err := h.query.GetWeaponSkills(r.Context(), itemID)
+	if err != nil {
+		HandleDatabaseError(w, r, err)
+		return
+	}
+
+	render.JSON(w, r, skills)
+}

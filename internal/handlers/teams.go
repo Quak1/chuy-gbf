@@ -381,25 +381,29 @@ func (h *TeamsHandler) SetWeaponSkill(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	skill, err := qtx.GetSlotSkill(r.Context(), store.GetSlotSkillParams{
+		TeamID:       slot.TeamID,
+		SlotPosition: slot.Position,
+		Position:     skillPosition,
+	})
+	if err != nil {
+		HandleDatabaseError(w, r, err)
+		return
+	}
+
 	err = tx.Commit()
 	if err != nil {
 		render.Render(w, r, ErrorServer(err))
 		return
 	}
 
-	render.NoContent(w, r)
+	render.JSON(w, r, skill)
 }
 
 func (h *TeamsHandler) ClearWeaponSkill(w http.ResponseWriter, r *http.Request) {
 	teamID := r.Context().Value(TeamIDKey).(int64)
 	slotPosition := r.Context().Value(SlotPositionKey).(int64)
 	skillPosition := r.Context().Value(SkillPositionKey).(int64)
-
-	var data TeamWeaponSkillRequest
-	if err := render.Bind(r, &data); err != nil {
-		render.Render(w, r, ErrorInvalidRequest(err))
-		return
-	}
 
 	tx, err := h.db.Begin()
 	if err != nil {

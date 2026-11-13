@@ -29,7 +29,7 @@ const handleSubmit = async () => {
 
   if (ok) emit("update", name.value, url.value);
   else {
-    console.log({ error: error.value, data: data.value });
+    console.error({ error: error.value, data: data.value });
     alert("There was an error updating the team. Try again later!");
   }
 

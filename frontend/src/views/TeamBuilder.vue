@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { computed, ref, watchEffect, watch } from "vue";
-import type { ItemCategory, Team } from "../models";
+import type {
+  ItemCategory,
+  SearchItemModalData,
+  Team,
+  WeaponSkill,
+} from "../models";
 import TeamCharacters from "../components/TeamCharacters.vue";
 import TeamSummons from "../components/TeamSummons.vue";
 import TeamWeapons from "../components/TeamWeapons.vue";
@@ -36,7 +41,7 @@ watchEffect(() => {
 });
 
 const isModalOpen = ref(false);
-const selectedData = ref<{ idx: number; category: ItemCategory } | null>(null);
+const selectedData = ref<SearchItemModalData | null>(null);
 
 watch(isModalOpen, () => {
   if (!isModalOpen.value) selectedData.value = null;
@@ -80,6 +85,7 @@ const setItem = async (
     const newItem = {
       ...items.value[category][itemId],
       position: position,
+      skills: new Array(4).fill(null),
     };
 
     team.value[category][position] = newItem;
@@ -118,6 +124,81 @@ const handleDeleteTeam = async () => {
     alert("Error deleting this team. Please try again later!");
   } else router.push({ name: "TeamsTable" });
 };
+
+const isSkillModalOpen = ref(false);
+const selectedSkill = ref<{
+  slot: number;
+  position: number;
+  itemId: string;
+} | null>(null);
+
+const handleSelectSkill = (slot: number, position: number) => {
+  if (!team.value) return;
+
+  const weaponId = team.value.weapon[slot]?.id;
+  if (!weaponId) return;
+
+  selectedSkill.value = { slot, position, itemId: weaponId };
+  isSkillModalOpen.value = true;
+};
+
+const handleSetSkill = async (skillId: string) => {
+  if (selectedSkill.value === null) return;
+
+  const { position, slot } = selectedSkill.value;
+
+  if (skillId === "clear") {
+    clearSkill(slot, position);
+  } else {
+    setSkill(skillId, slot, position);
+  }
+
+  isSkillModalOpen.value = false;
+};
+
+const {
+  call: skillCall,
+  error: skillError,
+  data: skillData,
+} = useAPI<WeaponSkill>();
+
+const setSkill = async (skillId: string, slot: number, position: number) => {
+  const ok = await skillCall(
+    `/api/teams/${props.teamId}/weapons/${slot}/skills/${position}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ skill_id: skillId }),
+    },
+  );
+
+  if (!ok) {
+    console.error(selectedSkill.value);
+    console.error(skillError.value);
+    alert(`error`);
+  } else if (items.value) {
+    if (team.value.weapon[slot])
+      team.value.weapon[slot].skills[position] = skillData.value;
+  }
+};
+
+const clearSkill = async (slot: number, position: number) => {
+  const ok = await skillCall(
+    `/api/teams/${props.teamId}/weapons/${slot}/skills/${position}`,
+    {
+      method: "DELETE",
+    },
+  );
+
+  if (!ok) {
+    console.error(selectedSkill.value);
+    console.error(skillError.value);
+    alert(`error`);
+    return;
+  }
+
+  if (team.value.weapon[slot]) team.value.weapon[slot].skills[position] = null;
+};
 </script>
 
 <template>
@@ -146,6 +227,7 @@ const handleDeleteTeam = async () => {
     <TeamWeapons
       :weapons="team.weapon"
       @select="(idx) => handleSelect(idx, 'weapon')"
+      @selectSkillPos="handleSelectSkill"
     />
     <TeamSummons
       :summons="team.summon"
@@ -158,5 +240,11 @@ const handleDeleteTeam = async () => {
     v-if="selectedData"
     :data="selectedData"
     @set="handleSetItem"
+  />
+  <SearchSkillModal
+    v-model:open="isSkillModalOpen"
+    v-if="selectedSkill"
+    :weaponId="selectedSkill.itemId"
+    @set="handleSetSkill"
   />
 </template>

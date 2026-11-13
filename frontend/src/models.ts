@@ -61,7 +61,18 @@ export interface Slot extends Item {
   position: number;
 }
 
+export interface WeaponSkill {
+  id: string;
+  name: string;
+  img: string;
+}
+
+export interface Weapon extends Slot {
+  skills: (WeaponSkill | null)[];
+}
+
 export type SlotItem = Slot | null;
+export type SlotWeapon = Weapon | null;
 
 export interface Team {
   name: string;
@@ -69,7 +80,7 @@ export interface Team {
   id: number;
   character: SlotItem[];
   summon: SlotItem[];
-  weapon: SlotItem[];
+  weapon: SlotWeapon[];
 }
 
 export interface SearchItemModalData {

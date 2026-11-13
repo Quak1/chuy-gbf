@@ -273,11 +273,12 @@ func (q *Queries) GetItemValues(ctx context.Context, itemID string) ([]ItemValue
 }
 
 const getWeaponSkills = `-- name: GetWeaponSkills :many
-SELECT name, img FROM weapon_skills
+SELECT id, name, img FROM weapon_skills
 WHERE weapon_id = ?
 `
 
 type GetWeaponSkillsRow struct {
+	ID   int64  `json:"id"`
 	Name string `json:"name"`
 	Img  string `json:"img"`
 }
@@ -291,7 +292,7 @@ func (q *Queries) GetWeaponSkills(ctx context.Context, weaponID string) ([]GetWe
 	var items []GetWeaponSkillsRow
 	for rows.Next() {
 		var i GetWeaponSkillsRow
-		if err := rows.Scan(&i.Name, &i.Img); err != nil {
+		if err := rows.Scan(&i.ID, &i.Name, &i.Img); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

@@ -45,5 +45,5 @@ ON CONFLICT(weapon_id, name) DO UPDATE SET
   img=excluded.img;
 
 -- name: GetWeaponSkills :many
-SELECT name, img FROM weapon_skills
+SELECT id, name, img FROM weapon_skills
 WHERE weapon_id = ?;

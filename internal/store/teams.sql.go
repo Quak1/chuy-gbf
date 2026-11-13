@@ -111,6 +111,32 @@ func (q *Queries) GetSlot(ctx context.Context, arg GetSlotParams) (TeamSlot, err
 	return i, err
 }
 
+const getSlotSkill = `-- name: GetSlotSkill :one
+SELECT ws.id, ws.name, ws.img
+FROM team_weapon_skills tws
+JOIN weapon_skills ws ON tws.weapon_skill_id = ws.id
+WHERE tws.team_id = ? AND tws.slot_position = ? AND tws.position = ?
+`
+
+type GetSlotSkillParams struct {
+	TeamID       int64 `json:"team_id"`
+	SlotPosition int64 `json:"slot_position"`
+	Position     int64 `json:"position"`
+}
+
+type GetSlotSkillRow struct {
+	ID   int64  `json:"id"`
+	Name string `json:"name"`
+	Img  string `json:"img"`
+}
+
+func (q *Queries) GetSlotSkill(ctx context.Context, arg GetSlotSkillParams) (GetSlotSkillRow, error) {
+	row := q.db.QueryRowContext(ctx, getSlotSkill, arg.TeamID, arg.SlotPosition, arg.Position)
+	var i GetSlotSkillRow
+	err := row.Scan(&i.ID, &i.Name, &i.Img)
+	return i, err
+}
+
 const getTeam = `-- name: GetTeam :one
 SELECT id, name, url, created_at, updated_at FROM teams
 WHERE teams.id = ?
