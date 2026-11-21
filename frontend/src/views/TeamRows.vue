@@ -6,7 +6,7 @@ import { useItems } from "../composables/useItems";
 import type { Team } from "../models";
 import { computed, ref } from "vue";
 import ItemsImageList from "../components/ItemsImageList.vue";
-import { flattenItemsObject, isIn } from "../utils";
+import { addElementLabel, flattenItemsObject, isIn } from "../utils";
 
 const router = useRouter();
 const { data, error, loading } = useFetch<Team[]>("/api/teams");
@@ -35,9 +35,9 @@ const includeCharacters = ref(true);
 const selectItems = computed(() => {
   if (!items.value) return { characters: [], summons: [], weapons: [] };
   return {
-    characters: flattenItemsObject(items.value.character),
-    summons: flattenItemsObject(items.value.summon),
-    weapons: flattenItemsObject(items.value.weapon),
+    characters: addElementLabel(flattenItemsObject(items.value.character)),
+    summons: addElementLabel(flattenItemsObject(items.value.summon)),
+    weapons: addElementLabel(flattenItemsObject(items.value.weapon)),
   };
 });
 

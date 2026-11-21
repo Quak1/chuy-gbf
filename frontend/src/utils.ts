@@ -94,8 +94,29 @@ export function flattenItemsObject(items: Record<string, Item>) {
   return Object.values(items).map((i) => ({
     label: i.name.charAt(0).toUpperCase() + i.name.slice(1),
     id: i.id,
+    item: i,
   }));
 }
+
+export function addElementLabel(items: ReturnType<typeof flattenItemsObject>) {
+  return items.map((item) => {
+    const tag = elementToEmoji[item.item.element];
+    return {
+      label: `${tag} ${item.label}`,
+      id: item.id,
+    };
+  });
+}
+
+const elementToEmoji: Record<string, string> = {
+  wind: "🟢",
+  water: "🔵",
+  earth: "🟠",
+  fire: "🔴",
+  light: "🟡",
+  dark: "🟣",
+  any: "🌈",
+};
 
 interface Identifiable {
   id: string;
